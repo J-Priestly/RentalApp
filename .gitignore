@@ -1,0 +1,7 @@
+@"
+.vs/
+bin/
+obj/
+*.user
+appsettings.json
+"@ | Out-File -Encoding utf8 .gitignore
