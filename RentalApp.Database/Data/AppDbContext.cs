@@ -32,6 +32,10 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; }
     public DbSet<UserRole> UserRoles { get; set; }
 
+    public DbSet<Item> Items { get; set; }
+    public DbSet<Rental> Rentals { get; set; }
+    public DbSet<Review> Reviews { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -67,6 +71,44 @@ public class AppDbContext : DbContext
             entity.HasOne(ur => ur.Role)
                   .WithMany(r => r.UserRoles)
                   .HasForeignKey(ur => ur.RoleId);
+        });
+
+        //Item
+        modelBuilder.Entity<Item>(entity =>
+        {
+            entity.HasIndex(e => e.CategoryId);
+            entity.HasOne(e => e.Owner)
+                  .WithMany()
+                  .HasForeignKey(e => e.OwnerId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Rental
+        modelBuilder.Entity<Rental>(entity =>
+        {
+            entity.HasIndex(e => e.Status);
+            entity.HasOne(e => e.Item)
+                  .WithMany(i => i.Rentals)
+                  .HasForeignKey(e => e.ItemId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Borrower)
+                  .WithMany()
+                  .HasForeignKey(e => e.BorrowerId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        
+        // Review
+        modelBuilder.Entity<Review>(entity =>
+        {
+            entity.HasOne(e => e.Item)
+                  .WithMany(i => i.Reviews)
+                  .HasForeignKey(e => e.ItemId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Rental)
+                  .WithMany()
+                  .HasForeignKey(e => e.RentalId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
     }
 
