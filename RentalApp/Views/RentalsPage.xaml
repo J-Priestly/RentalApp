@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RentalApp.ViewModels"
+             xmlns:models="clr-namespace:RentalApp.Database.Models;assembly=RentalApp.Database"
+             x:Class="RentalApp.Views.RentalsPage"
+             x:DataType="vm:RentalsViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F2F2, Dark=#1A1A1A}">
+	<Grid RowDefinitions="Auto,*">
+		<Border Grid.Row="0" Margin="16,12"
+                BackgroundColor="{AppThemeBinding Light=#E8E8E8, Dark=#333333}"
+                StrokeThickness="0" Padding="4">
+			<Border.StrokeShape>
+				<RoundRectangle CornerRadius="25"/>
+			</Border.StrokeShape>
+			<Grid ColumnDefinitions="*,*">
+				<Button Text="Incoming" Command="{Binding ShowIncomingCommand}"
+                        HeightRequest="42" FontSize="15" FontAttributes="Bold" CornerRadius="21"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark=#555555}"
+                        TextColor="{AppThemeBinding Light=#222222, Dark=White}"/>
+				<Button Grid.Column="1" Text="Outgoing" Command="{Binding ShowOutgoingCommand}"
+                        HeightRequest="42" FontSize="15" CornerRadius="21"
+                        BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+			</Grid>
+		</Border>
+		<RefreshView Grid.Row="1" Command="{Binding LoadRentalsCommand}" IsRefreshing="{Binding IsBusy}">
+			<Grid>
+				<CollectionView ItemsSource="{Binding IncomingRentals}" IsVisible="{Binding ShowingIncoming}">
+					<CollectionView.ItemTemplate>
+						<DataTemplate x:DataType="models:Rental">
+							<Border Margin="12,4" BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                    StrokeThickness="0" Padding="16">
+								<Border.StrokeShape>
+									<RoundRectangle CornerRadius="12"/>
+								</Border.StrokeShape>
+								<VerticalStackLayout Spacing="8">
+									<HorizontalStackLayout>
+										<Label Text="{Binding ItemId, StringFormat='Item #{0}'}"
+                                               FontSize="17" FontAttributes="Bold" HorizontalOptions="StartAndExpand"/>
+										<Border BackgroundColor="{AppThemeBinding Light=#FFF3E0, Dark=#3A2A1A}"
+                                                StrokeThickness="0" Padding="10,4">
+											<Border.StrokeShape>
+												<RoundRectangle CornerRadius="10"/>
+											</Border.StrokeShape>
+											<Label Text="{Binding Status}" FontSize="12"
+                                                   TextColor="{AppThemeBinding Light=#E65100, Dark=#FFB74D}"/>
+										</Border>
+									</HorizontalStackLayout>
+									<Grid ColumnDefinitions="*,*">
+										<VerticalStackLayout>
+											<Label Text="From" FontSize="12" TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+											<Label Text="{Binding StartDate, StringFormat='{0:dd MMM yyyy}'}" FontSize="14"/>
+										</VerticalStackLayout>
+										<VerticalStackLayout Grid.Column="1">
+											<Label Text="To" FontSize="12" TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+											<Label Text="{Binding EndDate, StringFormat='{0:dd MMM yyyy}'}" FontSize="14"/>
+										</VerticalStackLayout>
+									</Grid>
+									<Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,4,0,0">
+										<Button Text="Approve"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RentalsViewModel}}, Path=ApproveRentalCommand}"
+                                                CommandParameter="{Binding .}"
+                                                HeightRequest="40" FontSize="14" BackgroundColor="#4CAF50" TextColor="White" CornerRadius="20"/>
+										<Button Grid.Column="1" Text="Reject"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RentalsViewModel}}, Path=RejectRentalCommand}"
+                                                CommandParameter="{Binding .}"
+                                                HeightRequest="40" FontSize="14" BackgroundColor="#E53935" TextColor="White" CornerRadius="20"/>
+									</Grid>
+								</VerticalStackLayout>
+							</Border>
+						</DataTemplate>
+					</CollectionView.ItemTemplate>
+					<CollectionView.EmptyView>
+						<VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8" Padding="40">
+							<Label Text="No incoming requests" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center"
+                                   TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+							<Label Text="When someone wants to rent your items, requests show here"
+                                   FontSize="14" HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+						</VerticalStackLayout>
+					</CollectionView.EmptyView>
+				</CollectionView>
+				<CollectionView ItemsSource="{Binding OutgoingRentals}"
+                                IsVisible="{Binding ShowingIncoming, Converter={StaticResource InvertedBoolConverter}}">
+					<CollectionView.ItemTemplate>
+						<DataTemplate x:DataType="models:Rental">
+							<Border Margin="12,4" BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                    StrokeThickness="0" Padding="16">
+								<Border.StrokeShape>
+									<RoundRectangle CornerRadius="12"/>
+								</Border.StrokeShape>
+								<VerticalStackLayout Spacing="8">
+									<HorizontalStackLayout>
+										<Label Text="{Binding ItemId, StringFormat='Item #{0}'}"
+                                               FontSize="17" FontAttributes="Bold" HorizontalOptions="StartAndExpand"/>
+										<Border BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A3A5C}"
+                                                StrokeThickness="0" Padding="10,4">
+											<Border.StrokeShape>
+												<RoundRectangle CornerRadius="10"/>
+											</Border.StrokeShape>
+											<Label Text="{Binding Status}" FontSize="12"
+                                                   TextColor="{AppThemeBinding Light=#1565C0, Dark=#64B5F6}"/>
+										</Border>
+									</HorizontalStackLayout>
+									<Grid ColumnDefinitions="*,*">
+										<VerticalStackLayout>
+											<Label Text="From" FontSize="12" TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+											<Label Text="{Binding StartDate, StringFormat='{0:dd MMM yyyy}'}" FontSize="14"/>
+										</VerticalStackLayout>
+										<VerticalStackLayout Grid.Column="1">
+											<Label Text="To" FontSize="12" TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+											<Label Text="{Binding EndDate, StringFormat='{0:dd MMM yyyy}'}" FontSize="14"/>
+										</VerticalStackLayout>
+									</Grid>
+									<Label Text="{Binding TotalPrice, StringFormat='Total: {0:F2}'}"
+                                           FontSize="16" FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light=#1565C0, Dark=#64B5F6}"/>
+								</VerticalStackLayout>
+							</Border>
+						</DataTemplate>
+					</CollectionView.ItemTemplate>
+					<CollectionView.EmptyView>
+						<VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8" Padding="40">
+							<Label Text="No outgoing requests" FontSize="18" FontAttributes="Bold" HorizontalOptions="Center"
+                                   TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+							<Label Text="Request to rent an item and it will appear here"
+                                   FontSize="14" HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+						</VerticalStackLayout>
+					</CollectionView.EmptyView>
+				</CollectionView>
+			</Grid>
+		</RefreshView>
+	</Grid>
+</ContentPage>

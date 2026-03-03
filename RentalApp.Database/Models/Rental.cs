@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 
 namespace RentalApp.Database.Models
@@ -35,6 +36,7 @@ namespace RentalApp.Database.Models
         public DateTime EndDate { get; set; }
 
         [Required]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public RentalStatus Status { get; set; } = RentalStatus.Requested;
 
         [Column(TypeName = "decimal(10,2)")]

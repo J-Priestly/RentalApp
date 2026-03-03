@@ -5,6 +5,7 @@ namespace RentalApp.Services;
 public interface IApiService
 {
     bool IsAuthenticated { get; }
+    int CurrentUserId { get; }
 
     // Auth
     Task<ApiTokenResponse?> LoginAsync(string email, string password);
@@ -19,6 +20,7 @@ public interface IApiService
     Task<IEnumerable<Item>> GetItemsAsync();
     Task<Item?> GetItemAsync(int id);
     Task<Item?> CreateItemAsync(string title, string description, decimal dailyRate, int categoryId, double latitude, double longitude);
+    Task<Item?> UpdateItemAsync(int id, string title, string description, decimal dailyRate, int categoryId, double latitude, double longitude);
 
 
     // Rentals

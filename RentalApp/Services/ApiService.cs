@@ -9,8 +9,10 @@ public class ApiService : IApiService
     private const string BaseUrl = "https://set09102-api.b-davison.workers.dev";
     private readonly HttpClient _http;
     private string? _token;
+    private int _currentUserId;
 
     public bool IsAuthenticated => !string.IsNullOrEmpty(_token);
+    public int CurrentUserId => _currentUserId;
 
     public ApiService()
     {
@@ -34,6 +36,7 @@ public class ApiService : IApiService
             if (result != null)
             {
                 _token = result.Token;
+                _currentUserId = result.UserId;
                 ApplyAuth();
             }
             return result;
@@ -72,8 +75,8 @@ public class ApiService : IApiService
         ApplyAuth();
         try
         {
-            return await _http.GetFromJsonAsync<IEnumerable<Category>>("/categories")
-                   ?? Enumerable.Empty<Category>();
+            var result = await _http.GetFromJsonAsync<CategoriesResponse>("/categories");
+            return result?.Categories ?? Enumerable.Empty<Category>();
         }
         catch { return Enumerable.Empty<Category>(); }
     }
@@ -83,10 +86,14 @@ public class ApiService : IApiService
         ApplyAuth();
         try
         {
-            return await _http.GetFromJsonAsync<IEnumerable<Item>>("/items")
-                   ?? Enumerable.Empty<Item>();
+            var result = await _http.GetFromJsonAsync<ItemsResponse>("/items");
+            return result?.Items ?? Enumerable.Empty<Item>();
         }
-        catch { return Enumerable.Empty<Item>(); }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"GetItems error: {ex.Message}");
+            return Enumerable.Empty<Item>();
+        }
     }
 
     public async Task<Item?> GetItemAsync(int id)
@@ -114,6 +121,36 @@ public class ApiService : IApiService
                 longitude
             });
 
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"CreateItem failed: {response.StatusCode} - {error}");
+                return null;
+            }
+            return await response.Content.ReadFromJsonAsync<Item>();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"CreateItem exception: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task<Item?> UpdateItemAsync(int id, string title, string description, decimal dailyRate, int categoryId, double latitude, double longitude)
+    {
+        ApplyAuth();
+        try
+        {
+            var response = await _http.PutAsJsonAsync($"/items/{id}", new
+            {
+                title,
+                description,
+                dailyRate,
+                categoryId,
+                latitude,
+                longitude
+            });
+
             if (!response.IsSuccessStatusCode) return null;
             return await response.Content.ReadFromJsonAsync<Item>();
         }
@@ -132,10 +169,19 @@ public class ApiService : IApiService
                 endDate = endDate.ToString("yyyy-MM-dd")
             });
 
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"CreateRental failed: {response.StatusCode} - {error}");
+                return null;
+            }
             return await response.Content.ReadFromJsonAsync<Rental>();
         }
-        catch { return null; }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"CreateRental exception: {ex.Message}");
+            return null;
+        }
     }
 
     public async Task<IEnumerable<Rental>> GetIncomingRentalsAsync()
@@ -143,10 +189,14 @@ public class ApiService : IApiService
         ApplyAuth();
         try
         {
-            return await _http.GetFromJsonAsync<IEnumerable<Rental>>("/rentals/incoming")
-                   ?? Enumerable.Empty<Rental>();
+            var result = await _http.GetFromJsonAsync<RentalsResponse>("/rentals/incoming");
+            return result?.Rentals ?? Enumerable.Empty<Rental>();
         }
-        catch { return Enumerable.Empty<Rental>(); }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Incoming rentals error: {ex.Message}");
+            return Enumerable.Empty<Rental>();
+        }
     }
 
     public async Task<IEnumerable<Rental>> GetOutgoingRentalsAsync()
@@ -154,10 +204,14 @@ public class ApiService : IApiService
         ApplyAuth();
         try
         {
-            return await _http.GetFromJsonAsync<IEnumerable<Rental>>("/rentals/outgoing")
-                   ?? Enumerable.Empty<Rental>();
+            var result = await _http.GetFromJsonAsync<RentalsResponse>("/rentals/outgoing");
+            return result?.Rentals ?? Enumerable.Empty<Rental>();
         }
-        catch { return Enumerable.Empty<Rental>(); }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Outgoing rentals error: {ex.Message}");
+            return Enumerable.Empty<Rental>();
+        }
     }
 
     public async Task<ApiStatusResponse?> UpdateRentalStatusAsync(int id, string status)
@@ -171,6 +225,4 @@ public class ApiService : IApiService
         }
         catch { return null; }
     }
-
 }
-

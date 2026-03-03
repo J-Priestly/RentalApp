@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RentalApp.ViewModels"
+             xmlns:models="clr-namespace:RentalApp.Database.Models;assembly=RentalApp.Database"
+             x:Class="RentalApp.Views.ItemsListPage"
+             x:DataType="vm:ItemsListViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F2F2, Dark=#1A1A1A}">
+
+	<Grid RowDefinitions="Auto,Auto,*">
+
+		<!-- Search Bar -->
+		<Border Grid.Row="0" Margin="12,12,12,0"
+                BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                StrokeThickness="0"
+                Padding="4">
+			<Border.StrokeShape>
+				<RoundRectangle CornerRadius="24"/>
+			</Border.StrokeShape>
+			<SearchBar Placeholder="Search marketplace..."
+                       BackgroundColor="Transparent"/>
+		</Border>
+
+		<!-- Rent Button -->
+		<Button Grid.Row="1" Text="+ Rent Something"
+                Command="{Binding GoToCreateItemCommand}"
+                Margin="12,10"
+                HeightRequest="48"
+                FontAttributes="Bold"
+                FontSize="16"
+                BackgroundColor="#1877F2"
+                TextColor="White"
+                CornerRadius="24"/>
+
+		<!-- Items Grid -->
+		<RefreshView Grid.Row="2"
+                     Command="{Binding LoadItemsCommand}"
+                     IsRefreshing="{Binding IsBusy}">
+
+			<CollectionView ItemsSource="{Binding Items}"
+                            ItemsLayout="{OnIdiom Phone={StaticResource VerticalList}, Default={StaticResource TwoColumnGrid}}">
+
+				<CollectionView.Resources>
+					<LinearItemsLayout x:Key="VerticalList" Orientation="Vertical" ItemSpacing="0"/>
+					<GridItemsLayout x:Key="TwoColumnGrid" Orientation="Vertical" Span="2" HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+				</CollectionView.Resources>
+
+				<CollectionView.ItemTemplate>
+					<DataTemplate x:DataType="models:Item">
+						<Border Margin="8,4"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                StrokeThickness="0"
+                                Padding="0">
+							<Border.StrokeShape>
+								<RoundRectangle CornerRadius="12"/>
+							</Border.StrokeShape>
+							<Border.Shadow>
+								<Shadow Brush="#20000000" Offset="0,2" Radius="8" Opacity="0.3"/>
+							</Border.Shadow>
+							<Border.GestureRecognizers>
+								<TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ItemsListViewModel}}, Path=GoToItemDetailCommand}"
+                                    CommandParameter="{Binding .}"/>
+							</Border.GestureRecognizers>
+
+							<Grid RowDefinitions="160,Auto">
+								<!-- Placeholder Image Area -->
+								<Border Grid.Row="0"
+                                        BackgroundColor="{AppThemeBinding Light=#E8E8E8, Dark=#3A3A3A}"
+                                        StrokeThickness="0">
+									<Border.StrokeShape>
+										<RoundRectangle CornerRadius="12,12,0,0"/>
+									</Border.StrokeShape>
+									
+								</Border>
+
+								<!-- Item Info -->
+								<VerticalStackLayout Grid.Row="1" Padding="12,10" Spacing="4">
+									<Label Text="{Binding DailyRate, StringFormat='{0:F2}/day'}"
+                                           FontSize="20"
+                                           FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light=#222222, Dark=White}"/>
+									<Label Text="{Binding Title}"
+                                           FontSize="15"
+                                           TextColor="{AppThemeBinding Light=#444444, Dark=#CCCCCC}"
+                                           MaxLines="2"
+                                           LineBreakMode="TailTruncation"/>
+									<HorizontalStackLayout Spacing="6" Margin="0,4,0,0">
+										<Border BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A3A5C}"
+                                                StrokeThickness="0"
+                                                Padding="8,4">
+											<Border.StrokeShape>
+												<RoundRectangle CornerRadius="10"/>
+											</Border.StrokeShape>
+											<Label Text="{Binding Category}"
+                                                   FontSize="12"
+                                                   TextColor="{AppThemeBinding Light=#1565C0, Dark=#64B5F6}"/>
+										</Border>
+									</HorizontalStackLayout>
+								</VerticalStackLayout>
+							</Grid>
+
+						</Border>
+					</DataTemplate>
+				</CollectionView.ItemTemplate>
+
+				<CollectionView.EmptyView>
+					<VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="40">
+						<Label Text="No items listed yet"
+                               FontSize="20" FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+						<Label Text="Pull down to refresh or tap 'Rent Something' to list your first item!"
+                               FontSize="14"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+					</VerticalStackLayout>
+				</CollectionView.EmptyView>
+
+			</CollectionView>
+
+		</RefreshView>
+
+	</Grid>
+
+</ContentPage>

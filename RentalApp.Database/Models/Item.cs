@@ -32,15 +32,18 @@ namespace RentalApp.Database.Models
         [Required]
         public int OwnerId { get; set; }
 
-        public bool IsAvailabe { get; set; } = true;
+        public bool IsAvailable { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey(nameof(OwnerId))]
         public User? Owner { get; set; }
 
         public List<Rental> Rentals { get; set; } = new();
         public List<Review> Reviews { get; set; } = new();
+
+        [NotMapped]
+        public string Category { get; set; } = string.Empty;
     }
 }
