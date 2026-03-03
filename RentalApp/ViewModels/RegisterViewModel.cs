@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RentalApp.Services;
 using System.Text.RegularExpressions;
+using Windows.Services.Maps;
 
 namespace RentalApp.ViewModels;
 
@@ -15,6 +16,8 @@ namespace RentalApp.ViewModels;
 /// @extends BaseViewModel
 public partial class RegisterViewModel : BaseViewModel
 {
+    private readonly IApiService _apiService;
+
     /// @brief Authentication service for managing user registration
     private readonly IAuthenticationService _authService;
     
@@ -63,10 +66,11 @@ public partial class RegisterViewModel : BaseViewModel
     /// @param authService The authentication service instance
     /// @param navigationService The navigation service instance
     /// @details Sets up the required services and initializes the title
-    public RegisterViewModel(IAuthenticationService authService, INavigationService navigationService)
+    public RegisterViewModel(IAuthenticationService authService, INavigationService navigationService, IApiService apiService)
     {
         _authService = authService;
         _navigationService = navigationService;
+        _apiService = apiService;
         Title = "Register";
     }
 
@@ -87,17 +91,20 @@ public partial class RegisterViewModel : BaseViewModel
             IsBusy = true;
             ClearError();
 
-            var result = await _authService.RegisterAsync(FirstName, LastName, Email, Password);
+            // 1. Register with local database
+            var localResult = await _authService.RegisterAsync(FirstName, LastName, Email, Password);
 
-            if (result.IsSuccess)
+            if (!localResult.IsSuccess)
             {
-                await Application.Current.MainPage.DisplayAlert("Success", "Registration successful! Please login.", "OK");
-                await _navigationService.NavigateBackAsync();
+                SetError(localResult.Message);
+                return;
             }
-            else
-            {
-                SetError(result.Message);
-            }
+
+            // 2. Also register with the API
+            await _apiService.RegisterAsync(FirstName, LastName, Email, Password);
+
+            await Application.Current.MainPage.DisplayAlert("Success", "Registration successful! Please login.", "OK");
+            await _navigationService.NavigateBackAsync();
         }
         catch (Exception ex)
         {

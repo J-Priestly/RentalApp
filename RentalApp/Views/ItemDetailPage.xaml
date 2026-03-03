@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RentalApp.ViewModels"
+             x:Class="RentalApp.Views.ItemDetailPage"
+             x:DataType="vm:ItemDetailViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F2F2, Dark=#1A1A1A}">
+
+	<ScrollView>
+		<VerticalStackLayout Spacing="0">
+
+			<!-- Hero Image Area -->
+			<Border BackgroundColor="{AppThemeBinding Light=#E8E8E8, Dark=#3A3A3A}"
+                    StrokeThickness="0"
+                    HeightRequest="280">
+				<Label Text="No Image"
+                       FontSize="20"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center"
+                       Opacity="0.4"/>
+			</Border>
+
+			<!-- View Mode -->
+			<VerticalStackLayout Spacing="0"
+                                 IsVisible="{Binding IsEditing, Converter={StaticResource InvertedBoolConverter}}">
+
+				<!-- Price and Title Card -->
+				<Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        StrokeThickness="0"
+                        Padding="20,16"
+                        Margin="0,0,0,2">
+					<VerticalStackLayout Spacing="6">
+						<Label Text="{Binding Item.DailyRate, StringFormat='{0:F2}/day'}"
+                               FontSize="28"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#222222, Dark=White}"/>
+						<Label Text="{Binding Item.Title}"
+                               FontSize="20"
+                               TextColor="{AppThemeBinding Light=#444444, Dark=#CCCCCC}"/>
+						<HorizontalStackLayout Spacing="8" Margin="0,4,0,0">
+							<Border BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1B3A1B}"
+                                    StrokeThickness="0"
+                                    Padding="10,5">
+								<Border.StrokeShape>
+									<RoundRectangle CornerRadius="12"/>
+								</Border.StrokeShape>
+								<Label Text="Available"
+                                       FontSize="13"
+                                       TextColor="{AppThemeBinding Light=#2E7D32, Dark=#66BB6A}"/>
+							</Border>
+							<Border BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1A3A5C}"
+                                    StrokeThickness="0"
+                                    Padding="10,5">
+								<Border.StrokeShape>
+									<RoundRectangle CornerRadius="12"/>
+								</Border.StrokeShape>
+								<Label Text="{Binding Item.Category}"
+                                       FontSize="13"
+                                       TextColor="{AppThemeBinding Light=#1565C0, Dark=#64B5F6}"/>
+							</Border>
+						</HorizontalStackLayout>
+					</VerticalStackLayout>
+				</Border>
+
+				<!-- Description Card -->
+				<Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        StrokeThickness="0"
+                        Padding="20,16"
+                        Margin="0,0,0,2">
+					<VerticalStackLayout Spacing="8">
+						<Label Text="Description"
+                               FontSize="16"
+                               FontAttributes="Bold"/>
+						<Label Text="{Binding Item.Description}"
+                               FontSize="15"
+                               TextColor="{AppThemeBinding Light=#555555, Dark=#BBBBBB}"
+                               LineHeight="1.4"/>
+					</VerticalStackLayout>
+				</Border>
+
+				<!-- Owner Edit Button -->
+				<Button Text="Edit Listing"
+                        Command="{Binding StartEditingCommand}"
+                        IsVisible="{Binding IsOwner}"
+                        Margin="16,12"
+                        HeightRequest="44"
+                        FontSize="15"
+                        BackgroundColor="Transparent"
+                        TextColor="#1877F2"
+                        BorderColor="#1877F2"
+                        BorderWidth="1"
+                        CornerRadius="22"/>
+			</VerticalStackLayout>
+
+			<!-- Edit Mode -->
+			<Border Margin="16,16"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0"
+                    Padding="20"
+                    IsVisible="{Binding IsEditing}">
+				<Border.StrokeShape>
+					<RoundRectangle CornerRadius="12"/>
+				</Border.StrokeShape>
+				<VerticalStackLayout Spacing="14">
+					<Label Text="Edit Listing" FontSize="22" FontAttributes="Bold"/>
+
+					<Label Text="Title" FontSize="14" FontAttributes="Bold"/>
+					<Entry Text="{Binding EditTitle}"/>
+
+					<Label Text="Description" FontSize="14" FontAttributes="Bold"/>
+					<Editor Text="{Binding EditDescription}" HeightRequest="100"/>
+
+					<Label Text="Daily Rate" FontSize="14" FontAttributes="Bold"/>
+					<Entry Text="{Binding EditDailyRate}" Keyboard="Numeric"/>
+
+					<Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+						<Button Text="Save"
+                                Command="{Binding SaveEditCommand}"
+                                HeightRequest="44"
+                                BackgroundColor="#4CAF50"
+                                TextColor="White"
+                                CornerRadius="22"/>
+						<Button Grid.Column="1" Text="Cancel"
+                                Command="{Binding CancelEditingCommand}"
+                                HeightRequest="44"
+                                BackgroundColor="Gray"
+                                TextColor="White"
+                                CornerRadius="22"/>
+					</Grid>
+				</VerticalStackLayout>
+			</Border>
+
+			<!-- Rental Request Card -->
+			<Border Margin="16,8,16,24"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0"
+                    Padding="20">
+				<Border.StrokeShape>
+					<RoundRectangle CornerRadius="12"/>
+				</Border.StrokeShape>
+				<VerticalStackLayout Spacing="14">
+					<Label Text="Rent This Item"
+                           FontSize="20"
+                           FontAttributes="Bold"/>
+
+					<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+						<VerticalStackLayout Spacing="6">
+							<Label Text="Start Date" FontSize="13"
+                                   TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+							<DatePicker Date="{Binding StartDate}"/>
+						</VerticalStackLayout>
+						<VerticalStackLayout Grid.Column="1" Spacing="6">
+							<Label Text="End Date" FontSize="13"
+                                   TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+							<DatePicker Date="{Binding EndDate}"/>
+						</VerticalStackLayout>
+					</Grid>
+
+					<!-- Total -->
+					<Border BackgroundColor="{AppThemeBinding Light=#F0F7FF, Dark=#1A2A3A}"
+                            StrokeThickness="0"
+                            Padding="16,12">
+						<Border.StrokeShape>
+							<RoundRectangle CornerRadius="10"/>
+						</Border.StrokeShape>
+						<HorizontalStackLayout>
+							<Label Text="Estimated Total: "
+                                   FontSize="16"
+                                   VerticalOptions="Center"/>
+							<Label Text="{Binding TotalPrice, StringFormat='{0}'}"
+                                   FontSize="22"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light=#1565C0, Dark=#64B5F6}"/>
+						</HorizontalStackLayout>
+					</Border>
+
+					<Label Text="{Binding ErrorMessage}" TextColor="#E53935"
+                           IsVisible="{Binding HasError}" FontSize="14"/>
+
+					<Button Text="Request to Rent"
+                            Command="{Binding RequestRentalCommand}"
+                            HeightRequest="52"
+                            FontAttributes="Bold"
+                            FontSize="17"
+                            BackgroundColor="#1877F2"
+                            TextColor="White"
+                            CornerRadius="26"/>
+				</VerticalStackLayout>
+			</Border>
+
+		</VerticalStackLayout>
+	</ScrollView>
+
+</ContentPage>

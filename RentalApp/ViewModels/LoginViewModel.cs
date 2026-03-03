@@ -6,6 +6,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RentalApp.Services;
+using Windows.Services.Maps;
 
 namespace RentalApp.ViewModels;
 
@@ -19,6 +20,8 @@ public partial class LoginViewModel : BaseViewModel
     
     /// @brief Navigation service for managing page navigation
     private readonly INavigationService _navigationService;
+
+    private readonly IApiService _apiService;
 
     /// @brief The user's email address
     /// @details Observable property bound to the email input field
@@ -53,10 +56,11 @@ public partial class LoginViewModel : BaseViewModel
     /// @param authService The authentication service instance
     /// @param navigationService The navigation service instance
     /// @details Sets up the required services and initializes the title
-    public LoginViewModel(IAuthenticationService authService, INavigationService navigationService)
+    public LoginViewModel(IAuthenticationService authService, INavigationService navigationService, IApiService apiService)
     {
         _authService = authService;
         _navigationService = navigationService;
+        _apiService = apiService;
         Title = "Login";
     }
 
@@ -80,16 +84,32 @@ public partial class LoginViewModel : BaseViewModel
             IsBusy = true;
             ClearError();
 
-            var result = await _authService.LoginAsync(Email, Password);
+            // 1. Login with the local database
+            var localResult = await _authService.LoginAsync(Email, Password);
 
-            if (result.IsSuccess)
+            if (!localResult.IsSuccess)
             {
-                await _navigationService.NavigateToAsync("MainPage");
+                SetError(localResult.Message);
+                return;
             }
-            else
+
+            // 2. Gets the JWT token from the API
+            var apiResult = await _apiService.LoginAsync(Email, Password);
+
+            if (apiResult == null)
             {
-                SetError(result.Message);
+                // User exists locally but not on API = register user
+                await _apiService.RegisterAsync(
+                    _authService.CurrentUser?.FirstName ?? "",
+                    _authService.CurrentUser?.LastName ?? "",
+                    Email,
+                    Password);
+
+                // Trys to login again
+                await _apiService.LoginAsync(Email, Password);
             }
+
+            await _navigationService.NavigateToAsync("MainPage");
         }
         catch (Exception ex)
         {

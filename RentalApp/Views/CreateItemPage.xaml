@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RentalApp.ViewModels"
+             x:Class="RentalApp.Views.CreateItemPage"
+             x:DataType="vm:CreateItemViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F2F2, Dark=#1A1A1A}">
+
+	<ScrollView>
+		<VerticalStackLayout Spacing="0" Padding="0">
+
+			<!-- Header -->
+			<Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0"
+                    Padding="20,24">
+				<VerticalStackLayout Spacing="4">
+					<Label Text="Create Listing" FontSize="28" FontAttributes="Bold"/>
+					<Label Text="Fill in the details to list your item"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+				</VerticalStackLayout>
+			</Border>
+
+			<!-- Photo Placeholder -->
+			<Border Margin="16,16,16,0"
+                    BackgroundColor="{AppThemeBinding Light=#E8E8E8, Dark=#3A3A3A}"
+                    StrokeThickness="2"
+                    Stroke="{AppThemeBinding Light=#CCCCCC, Dark=#555555}"
+                    StrokeDashArray="6,3"
+                    HeightRequest="180"
+                    Padding="20">
+				<Border.StrokeShape>
+					<RoundRectangle CornerRadius="12"/>
+				</Border.StrokeShape>
+				<VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
+					<Label Text="Add Photos"
+                           FontSize="16" FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+					<Label Text="Coming soon"
+                           FontSize="12"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+				</VerticalStackLayout>
+			</Border>
+
+			<!-- Form Card -->
+			<Border Margin="16,16,16,0"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0"
+                    Padding="20">
+				<Border.StrokeShape>
+					<RoundRectangle CornerRadius="12"/>
+				</Border.StrokeShape>
+				<VerticalStackLayout Spacing="16">
+
+					<!-- Title -->
+					<VerticalStackLayout Spacing="6">
+						<Label Text="Title" FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}"/>
+						<Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+							<Border.StrokeShape>
+								<RoundRectangle CornerRadius="10"/>
+							</Border.StrokeShape>
+							<Entry Text="{Binding ItemTitle}"
+                                   Placeholder="What are you lending? (min 5 chars)"/>
+						</Border>
+					</VerticalStackLayout>
+
+					<!-- Description -->
+					<VerticalStackLayout Spacing="6">
+						<Label Text="Description" FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}"/>
+						<Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+							<Border.StrokeShape>
+								<RoundRectangle CornerRadius="10"/>
+							</Border.StrokeShape>
+							<Editor Text="{Binding Description}"
+                                    Placeholder="Describe condition, what's included..."
+                                    HeightRequest="120"/>
+						</Border>
+					</VerticalStackLayout>
+
+					<!-- Price and Category Row -->
+					<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+						<VerticalStackLayout Spacing="6">
+							<Label Text="Daily Rate" FontSize="14" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}"/>
+							<Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
+                                    StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                    Padding="4,0">
+								<Border.StrokeShape>
+									<RoundRectangle CornerRadius="10"/>
+								</Border.StrokeShape>
+								<Entry Text="{Binding DailyRate}"
+                                       Placeholder="0.00"
+                                       Keyboard="Numeric"/>
+							</Border>
+						</VerticalStackLayout>
+
+						<VerticalStackLayout Grid.Column="1" Spacing="6">
+							<Label Text="Category" FontSize="14" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}"/>
+							<Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
+                                    StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                    Padding="4,0">
+								<Border.StrokeShape>
+									<RoundRectangle CornerRadius="10"/>
+								</Border.StrokeShape>
+								<Picker ItemsSource="{Binding Categories}"
+                                        ItemDisplayBinding="{Binding Name}"
+                                        SelectedItem="{Binding SelectedCategory}"/>
+							</Border>
+						</VerticalStackLayout>
+					</Grid>
+
+					<!-- Location -->
+					<Label Text="Location" FontSize="14" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}"/>
+					<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+						<Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+							<Border.StrokeShape>
+								<RoundRectangle CornerRadius="10"/>
+							</Border.StrokeShape>
+							<Entry Text="{Binding Latitude}" Placeholder="Latitude" Keyboard="Numeric"/>
+						</Border>
+						<Border Grid.Column="1"
+                                BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+							<Border.StrokeShape>
+								<RoundRectangle CornerRadius="10"/>
+							</Border.StrokeShape>
+							<Entry Text="{Binding Longitude}" Placeholder="Longitude" Keyboard="Numeric"/>
+						</Border>
+					</Grid>
+
+				</VerticalStackLayout>
+			</Border>
+
+			<!-- Error -->
+			<Label Text="{Binding ErrorMessage}" TextColor="#E53935"
+                   IsVisible="{Binding HasError}"
+                   Margin="20,10" FontSize="14"/>
+
+			<!-- Buttons -->
+			<Button Text="Publish Listing"
+                    Command="{Binding CreateItemCommand}"
+                    Margin="16,16"
+                    HeightRequest="52"
+                    FontAttributes="Bold"
+                    FontSize="17"
+                    BackgroundColor="#1877F2"
+                    TextColor="White"
+                    CornerRadius="26"/>
+
+			<Button Text="Cancel"
+                    Command="{Binding CancelCommand}"
+                    Margin="16,0,16,24"
+                    HeightRequest="52"
+                    FontSize="16"
+                    BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"
+                    BorderColor="{AppThemeBinding Light=#CCCCCC, Dark=#555555}"
+                    BorderWidth="1"
+                    CornerRadius="26"/>
+
+		</VerticalStackLayout>
+	</ScrollView>
+
+</ContentPage>
