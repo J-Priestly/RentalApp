@@ -19,7 +19,11 @@ jobs:
         dotnet-version: '9.0.x'
 
     - name: Install MAUI workload
-      run: dotnet workload install maui
+      run: dotnet workload install maui-windows
+
+    - name: Create appsettings.json
+      run: |
+        Copy-Item RentalApp.Database/appsettings.json.template RentalApp.Database/appsettings.json
 
     - name: Restore dependencies
       run: dotnet restore
