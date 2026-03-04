@@ -10,6 +10,8 @@ public class ApiService : IApiService
     private readonly HttpClient _http;
     private string? _token;
     private int _currentUserId;
+    private string? _email;
+    private string? _password;
 
     public bool IsAuthenticated => !string.IsNullOrEmpty(_token);
     public int CurrentUserId => _currentUserId;
@@ -25,6 +27,18 @@ public class ApiService : IApiService
             _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
     }
 
+
+    private async Task<bool> HandleUnauthorizedAsync()
+    {
+        if (_email != null && _password != null)
+        {
+            _token = null;
+            var result = await LoginAsync(_email, _password);
+            return result != null;
+        }
+        return false;
+    }
+
     public async Task<ApiTokenResponse?> LoginAsync(string email, string password)
     {
         try
@@ -37,6 +51,8 @@ public class ApiService : IApiService
             {
                 _token = result.Token;
                 _currentUserId = result.UserId;
+                _email = email;
+                _password = password;
                 ApplyAuth();
             }
             return result;
@@ -86,7 +102,18 @@ public class ApiService : IApiService
         ApplyAuth();
         try
         {
-            var result = await _http.GetFromJsonAsync<ItemsResponse>("/items");
+            var response = await _http.GetAsync("/items");
+
+           
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                if (await HandleUnauthorizedAsync())
+                    response = await _http.GetAsync("/items");
+                else
+                    return Enumerable.Empty<Item>();
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<ItemsResponse>();
             return result?.Items ?? Enumerable.Empty<Item>();
         }
         catch (Exception ex)
