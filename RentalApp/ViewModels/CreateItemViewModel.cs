@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using RentalApp.Database.Data.Repositories;
 using RentalApp.Database.Models;
 using RentalApp.Services;
 
@@ -10,6 +11,7 @@ public partial class CreateItemViewModel : BaseViewModel
 {
     private readonly IApiService _apiService;
     private readonly INavigationService _navigationService;
+    private readonly IItemRepository _itemRepository;
 
     [ObservableProperty]
     private string itemTitle = string.Empty;
@@ -32,10 +34,11 @@ public partial class CreateItemViewModel : BaseViewModel
     [ObservableProperty]
     private string longitude = "-3.1883";
 
-    public CreateItemViewModel(IApiService apiService, INavigationService navigationService)
+    public CreateItemViewModel(IApiService apiService, INavigationService navigationService, IItemRepository itemRepository)
     {
         _apiService = apiService;
         _navigationService = navigationService;
+        _itemRepository = itemRepository;
         Title = "List New Item";
     }
 
@@ -88,6 +91,7 @@ public partial class CreateItemViewModel : BaseViewModel
 
             if (item != null)
             {
+                try { await _itemRepository.AddAsync(item); } catch { /* local DB unavailable */ }
                 await _navigationService.NavigateBackAsync();
             }
             else

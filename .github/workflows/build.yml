@@ -1,0 +1,29 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, feature/tier1-core ]
+  pull_request:
+    branches: [ main, feature/tier1-core ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore RentalApp.Database/RentalApp.Database.csproj
+
+      - name: Build
+        run: dotnet build RentalApp.Database/RentalApp.Database.csproj --no-restore
+
+      - name: Run tests with coverage
+        run: dotnet test RentalApp.Test/RentalApp.Test.csproj --collect:"XPlat Code Coverage" --settings RentalApp.Test/test.runsettings

@@ -8,5 +8,7 @@ public partial class AppShell : Shell
 	{	
 		BindingContext = viewModel;
 		InitializeComponent();
-	}
+        Routing.RegisterRoute("ReviewsPage", typeof(Views.ReviewsPage));
+
+    }
 }

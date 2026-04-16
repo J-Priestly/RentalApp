@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RentalApp.ViewModels"
+             xmlns:models="clr-namespace:RentalApp.Database.Models;assembly=RentalApp.Database"
+             x:Class="RentalApp.Views.ReviewsPage"
+             x:DataType="vm:ReviewsViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F2F2, Dark=#1A1A1A}">
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
+
+            <!-- Average Rating Card -->
+            <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0" Padding="20,16" Margin="0,0,0,2">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Average Rating" FontSize="14"
+                           TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+                    <HorizontalStackLayout Spacing="8">
+                        <Label Text="{Binding AverageRating, StringFormat='{0:F1}'}"
+                               FontSize="36" FontAttributes="Bold"/>
+                        <Label Text="/ 5" FontSize="20" VerticalOptions="End" Margin="0,0,0,6"
+                               TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding Reviews.Count, StringFormat='{0} review(s)'}"
+                           FontSize="13" TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Submit Review Card (only shown when rentalId passed) -->
+            <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0" Padding="20" Margin="0,0,0,2"
+                    IsVisible="{Binding CanSubmitReview}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="0"/>
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Leave a Review" FontSize="18" FontAttributes="Bold"/>
+
+                    <Label Text="Rating (1–5)" FontSize="14" FontAttributes="Bold"/>
+                    <Stepper Value="{Binding SelectedRating}" Minimum="1" Maximum="5" Increment="1"/>
+                    <Label Text="{Binding SelectedRating, StringFormat='Selected: {0} stars'}"
+                           FontSize="14" TextColor="{AppThemeBinding Light=#555555, Dark=#BBBBBB}"/>
+
+                    <Label Text="Comment" FontSize="14" FontAttributes="Bold"/>
+                    <Editor Text="{Binding Comment}" HeightRequest="100"
+                            Placeholder="Share your experience..."/>
+
+                    <Label Text="{Binding ErrorMessage}" TextColor="#E53935"
+                           IsVisible="{Binding HasError}" FontSize="14"/>
+
+                    <Button Text="Submit Review"
+                            Command="{Binding SubmitReviewCommand}"
+                            HeightRequest="48" FontAttributes="Bold"
+                            BackgroundColor="#1877F2" TextColor="White" CornerRadius="24"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Reviews List -->
+            <CollectionView ItemsSource="{Binding Reviews}" Margin="0,8">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Review">
+                        <Border Margin="12,4"
+                                BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                                StrokeThickness="0" Padding="16">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12"/>
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="6">
+                                <HorizontalStackLayout>
+                                    <Label Text="{Binding Reviewer.FullName}"
+                                           FontSize="15" FontAttributes="Bold"
+                                           HorizontalOptions="StartAndExpand"/>
+                                    <Border BackgroundColor="{AppThemeBinding Light=#FFF8E1, Dark=#3A2E00}"
+                                            StrokeThickness="0" Padding="10,4">
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="10"/>
+                                        </Border.StrokeShape>
+                                        <Label Text="{Binding Rating, StringFormat='{0} stars'}"
+                                               FontSize="13"
+                                               TextColor="{AppThemeBinding Light=#F57F17, Dark=#FFD54F}"/>
+                                    </Border>
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding Comment}" FontSize="14"
+                                       TextColor="{AppThemeBinding Light=#555555, Dark=#BBBBBB}"
+                                       LineHeight="1.4"/>
+                                <Label Text="{Binding CreatedAt, StringFormat='{0:dd MMM yyyy}'}"
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center"
+                                        Spacing="8" Padding="40">
+                        <Label Text="No reviews yet" FontSize="18" FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+                        <Label Text="Be the first to leave a review"
+                               FontSize="14" HorizontalOptions="Center"
+                               TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

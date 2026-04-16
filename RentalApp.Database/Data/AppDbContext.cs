@@ -15,8 +15,9 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        if (optionsBuilder.IsConfigured) return;
+
         var a = Assembly.GetExecutingAssembly();
-        // var resources = a.GetManifestResourceNames();
         using var stream = a.GetManifestResourceStream("RentalApp.Database.appsettings.json");
 
         var config = new ConfigurationBuilder()

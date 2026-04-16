@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using RentalApp.Database.Data.Repositories;
 using RentalApp.Database.Models;
 using RentalApp.Services;
 using System.Globalization;
@@ -11,6 +12,7 @@ public partial class ItemDetailViewModel : BaseViewModel
 {
     private readonly IApiService _apiService;
     private readonly INavigationService _navigationService;
+    private readonly IItemRepository _itemRepository;
 
     [ObservableProperty]
     private int itemId;
@@ -42,10 +44,13 @@ public partial class ItemDetailViewModel : BaseViewModel
     [ObservableProperty]
     private string editDailyRate = string.Empty;
 
-    public ItemDetailViewModel(IApiService apiService, INavigationService navigationService)
+    private readonly IRentalService _rentalService;
+    public ItemDetailViewModel(IApiService apiService, INavigationService navigationService, IItemRepository itemRepository, IRentalService rentalService)
     {
         _apiService = apiService;
         _navigationService = navigationService;
+        _itemRepository = itemRepository;
+        _rentalService = rentalService;
         Title = "Item Details";
     }
 
@@ -67,11 +72,10 @@ public partial class ItemDetailViewModel : BaseViewModel
     private void CalculateTotal()
     {
         if (Item == null) return;
-        var days = (EndDate - StartDate).Days;
-        if (days <= 0) days = 1;
-        var total = Item.DailyRate * days;
+        var total = _rentalService.CalculateTotalPrice(Item.DailyRate, StartDate, EndDate);
         TotalPrice = total.ToString("F2");
     }
+
 
     [RelayCommand]
     private async Task LoadItemAsync()
@@ -112,31 +116,33 @@ public partial class ItemDetailViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task GoToReviewsAsync()
+    {
+        if (Item == null) return;
+        await _navigationService.NavigateToAsync($"ReviewsPage?itemId={Item.Id}");
+    }
+
+
+    [RelayCommand]
     private async Task RequestRentalAsync()
     {
         if (IsBusy || Item == null) return;
-
-        if (EndDate <= StartDate)
-        {
-            SetError("End date must be after start date");
-            return;
-        }
-
         IsBusy = true;
         ClearError();
 
         try
         {
-            var rental = await _apiService.CreateRentalAsync(ItemId, StartDate, EndDate);
-            if (rental != null)
+            var (success, message, rental) = await _rentalService.RequestRentalAsync(
+                ItemId, StartDate, EndDate);
+
+            if (success)
             {
-                await Application.Current.MainPage.DisplayAlert(
-                    "Success", "Rental request sent!", "OK");
+                await Application.Current.MainPage.DisplayAlert("Success", message, "OK");
                 await _navigationService.NavigateBackAsync();
             }
             else
             {
-                SetError("Failed to create rental request");
+                SetError(message);
             }
         }
         catch (Exception ex)
@@ -148,6 +154,7 @@ public partial class ItemDetailViewModel : BaseViewModel
             IsBusy = false;
         }
     }
+
 
     [RelayCommand]
     private async Task GoBackAsync()
@@ -213,4 +220,6 @@ public partial class ItemDetailViewModel : BaseViewModel
             IsBusy = false;
         }
     }
+    
+
 }

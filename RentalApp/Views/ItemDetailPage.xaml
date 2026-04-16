@@ -83,7 +83,19 @@
 				<Button Text="Edit Listing"
                         Command="{Binding StartEditingCommand}"
                         IsVisible="{Binding IsOwner}"
-                        Margin="16,12"
+                        Margin="16,12,16,0"
+                        HeightRequest="44"
+                        FontSize="15"
+                        BackgroundColor="Transparent"
+                        TextColor="#1877F2"
+                        BorderColor="#1877F2"
+                        BorderWidth="1"
+                        CornerRadius="22"/>
+
+				<!-- Reviews Button -->
+				<Button Text="View Reviews"
+                        Command="{Binding GoToReviewsCommand}"
+                        Margin="16,8,16,12"
                         HeightRequest="44"
                         FontSize="15"
                         BackgroundColor="Transparent"
@@ -115,7 +127,7 @@
 					<Entry Text="{Binding EditDailyRate}" Keyboard="Numeric"/>
 
 					<Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-						<Button Text="Save"
+                        <Button Text="Save"
                                 Command="{Binding SaveEditCommand}"
                                 HeightRequest="44"
                                 BackgroundColor="#4CAF50"

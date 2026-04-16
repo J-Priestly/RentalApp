@@ -84,10 +84,12 @@ public partial class LoginViewModel : BaseViewModel
             IsBusy = true;
             ClearError();
 
-            // 1. Login with the local database
+            // 1. Try local DB login — skip if DB is unavailable
             var localResult = await _authService.LoginAsync(Email, Password);
+            bool localAuthAvailable = localResult.IsSuccess ||
+                (!localResult.Message.Contains("transient") && !localResult.Message.Contains("connection"));
 
-            if (!localResult.IsSuccess)
+            if (localAuthAvailable && !localResult.IsSuccess)
             {
                 SetError(localResult.Message);
                 return;
@@ -106,7 +108,13 @@ public partial class LoginViewModel : BaseViewModel
                     Password);
 
                 // Trys to login again
-                await _apiService.LoginAsync(Email, Password);
+                apiResult = await _apiService.LoginAsync(Email, Password);
+            }
+
+            if (apiResult == null)
+            {
+                SetError("Login failed: could not authenticate with server");
+                return;
             }
 
             await _navigationService.NavigateToAsync("MainPage");

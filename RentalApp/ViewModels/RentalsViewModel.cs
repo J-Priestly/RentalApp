@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using RentalApp.Database.Data.Repositories;
 using RentalApp.Database.Models;
 using RentalApp.Services;
 
@@ -9,6 +10,7 @@ namespace RentalApp.ViewModels;
 public partial class RentalsViewModel : BaseViewModel
 {
     private readonly IApiService _apiService;
+    private readonly IRentalRepository _rentalRepository;
 
     [ObservableProperty]
     private ObservableCollection<Rental> incomingRentals = new();
@@ -19,9 +21,13 @@ public partial class RentalsViewModel : BaseViewModel
     [ObservableProperty]
     private bool showingIncoming = true;
 
-    public RentalsViewModel(IApiService apiService)
+    private readonly IRentalService _rentalService;
+
+    public RentalsViewModel(IApiService apiService, IRentalRepository rentalRepository, IRentalService rentalService)
     {
         _apiService = apiService;
+        _rentalRepository = rentalRepository;
+        _rentalService = rentalService;
         Title = "My Rentals";
     }
 
@@ -66,33 +72,24 @@ public partial class RentalsViewModel : BaseViewModel
     private async Task ApproveRentalAsync(Rental rental)
     {
         if (rental == null) return;
-        await UpdateStatusAsync(rental.Id, "Approved");
+        var (success, message) = await _rentalService.ApproveRentalAsync(rental);
+        if (success)
+            await LoadRentalsAsync();
+        else
+            SetError(message);
     }
 
     [RelayCommand]
     private async Task RejectRentalAsync(Rental rental)
     {
         if (rental == null) return;
-        await UpdateStatusAsync(rental.Id, "Rejected");
+        var (success, message) = await _rentalService.RejectRentalAsync(rental);
+        if (success)
+            await LoadRentalsAsync();
+        else
+            SetError(message);
     }
 
-    private async Task UpdateStatusAsync(int rentalId, string status)
-    {
-        try
-        {
-            var result = await _apiService.UpdateRentalStatusAsync(rentalId, status);
-            if (result != null)
-            {
-                await LoadRentalsAsync();
-            }
-            else
-            {
-                SetError($"Failed to update status to {status}");
-            }
-        }
-        catch (Exception ex)
-        {
-            SetError($"Error: {ex.Message}");
-        }
-    }
+
+   
 }
