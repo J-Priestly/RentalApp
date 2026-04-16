@@ -2,9 +2,9 @@ name: Build and Test
 
 on:
   push:
-    branches: [ main, feature/tier1-core ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, feature/tier1-core ]
+    branches: [ main ]
 
 jobs:
   build-and-test:
@@ -18,6 +18,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
+
+      - name: Create placeholder appsettings.json      
+        run: |
+          echo '{
+            "ConnectionStrings": {
+              "DevelopmentConnection": "Host=localhost;Username=ci;Password=ci;Database=rentalapp"
+            }
+          }' > RentalApp.Database/appsettings.json
 
       - name: Restore dependencies
         run: dotnet restore RentalApp.Database/RentalApp.Database.csproj
