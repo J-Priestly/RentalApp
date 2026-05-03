@@ -44,6 +44,16 @@ public partial class ItemDetailViewModel : BaseViewModel
     [ObservableProperty]
     private string editDailyRate = string.Empty;
 
+    [ObservableProperty]
+    private string editLatitude = string.Empty;
+
+    [ObservableProperty]
+    private string editLongitude = string.Empty;
+
+    // add map picker for location editing
+    [ObservableProperty]
+    private string editAddressDisplay = "Tap the map or drag the pin to change location";
+
     private readonly IRentalService _rentalService;
     public ItemDetailViewModel(IApiService apiService, INavigationService navigationService, IItemRepository itemRepository, IRentalService rentalService)
     {
@@ -82,11 +92,15 @@ public partial class ItemDetailViewModel : BaseViewModel
     {
         if (IsBusy) return;
         IsBusy = true;
-        ClearError();
+        ResetError();
 
         try
         {
-            Item = await _apiService.GetItemAsync(ItemId);
+            // try local DB first, fall back to API if DB throws or returns nothing
+            Item? loaded = null;
+            try { loaded = await _itemRepository.GetByIdAsync(ItemId); } catch { }
+            Item = loaded ?? await _apiService.GetItemAsync(ItemId);
+
             if (Item != null)
             {
                 Title = Item.Title;
@@ -128,7 +142,7 @@ public partial class ItemDetailViewModel : BaseViewModel
     {
         if (IsBusy || Item == null) return;
         IsBusy = true;
-        ClearError();
+        ResetError();
 
         try
         {
@@ -165,6 +179,12 @@ public partial class ItemDetailViewModel : BaseViewModel
     [RelayCommand]
     private void StartEditing()
     {
+        if (Item != null)
+        {
+            EditLatitude = Item.Latitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture);
+            EditLongitude = Item.Longitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture);
+            EditAddressDisplay = "Tap the map or drag to change location";
+        }
         IsEditing = true;
     }
 
@@ -177,6 +197,8 @@ public partial class ItemDetailViewModel : BaseViewModel
             EditTitle = Item.Title;
             EditDescription = Item.Description;
             EditDailyRate = Item.DailyRate.ToString("F2");
+            EditLatitude = Item.Latitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture);
+            EditLongitude = Item.Longitude.ToString("F6", System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 
@@ -191,14 +213,21 @@ public partial class ItemDetailViewModel : BaseViewModel
         if (!decimal.TryParse(EditDailyRate, out var rate) || rate <= 0)
         { SetError("Please enter a valid daily rate"); return; }
 
+        if (!double.TryParse(EditLatitude, System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out var lat))
+            lat = Item.Latitude;
+        if (!double.TryParse(EditLongitude, System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out var lng))
+            lng = Item.Longitude;
+
         IsBusy = true;
-        ClearError();
+        ResetError();
 
         try
         {
             var updated = await _apiService.UpdateItemAsync(
                 Item.Id, EditTitle, EditDescription, rate,
-                Item.CategoryId, Item.Latitude, Item.Longitude);
+                Item.CategoryId, lat, lng);
 
             if (updated != null)
             {

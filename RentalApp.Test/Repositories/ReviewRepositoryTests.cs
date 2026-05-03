@@ -17,6 +17,7 @@ public class ReviewRepositoryTests : IClassFixture<DatabaseFixture>
         _repository = new ReviewRepository(_fixture.Context);
     }
 
+    // helper to avoid repeating the same object setup in every test
     private async Task<Review> AddTestReviewAsync(int rating = 4, int itemId = 1)
     {
         var review = new Review
@@ -34,11 +35,9 @@ public class ReviewRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task AddAsync_AddsReviewToDatabase()
     {
-        // Sets Up
         var added = await AddTestReviewAsync(rating: 5);
         var result = await _repository.GetByIdAsync(added.Id);
 
-        // calls the method
         Assert.NotNull(result);
         Assert.Equal(5, result.Rating);
         Assert.Equal("Test review comment", result.Comment);
@@ -47,13 +46,13 @@ public class ReviewRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetByIdAsync_WithValidId_ReturnsReview()
     {
-        // Sets Up
+        // Arrange
         var added = await AddTestReviewAsync(rating: 3);
 
-        // calls the method
+        // Act
         var result = await _repository.GetByIdAsync(added.Id);
 
-        // checks the result
+        // Assert
         Assert.NotNull(result);
         Assert.Equal(3, result.Rating);
     }
@@ -61,24 +60,18 @@ public class ReviewRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetByIdAsync_WithInvalidId_ReturnsNull()
     {
-        // calls the method
         var result = await _repository.GetByIdAsync(999);
-
-        // checks the result
         Assert.Null(result);
     }
 
     [Fact]
     public async Task GetByItemAsync_ReturnsReviewsForItem()
     {
-        // Sets Up
         await AddTestReviewAsync(rating: 4, itemId: 1);
         await AddTestReviewAsync(rating: 5, itemId: 1);
 
-        // calls the method
         var result = await _repository.GetByItemAsync(1);
 
-        // checks the result
         Assert.NotNull(result);
         Assert.NotEmpty(result);
         Assert.All(result, r => Assert.Equal(1, r.ItemId));
@@ -87,48 +80,37 @@ public class ReviewRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetByItemAsync_WithNoReviews_ReturnsEmpty()
     {
-        // calls the method — item 999 has no reviews
+        // item 999 has no reviews
         var result = await _repository.GetByItemAsync(999);
-
-        // checks the result
         Assert.Empty(result);
     }
 
     [Fact]
     public async Task GetAverageRatingAsync_WithReviews_ReturnsCorrectAverage()
     {
-        // Sets Up — re-seed to clear previous reviews, then add known ones
+        // re-seed to clear previous reviews, then add two known ones
         _fixture.Seed();
         await AddTestReviewAsync(rating: 4, itemId: 1);
         await AddTestReviewAsync(rating: 2, itemId: 1);
 
-        // calls the method
         var average = await _repository.GetAverageRatingAsync(1);
 
-        // checks the result
         Assert.Equal(3.0, average);
     }
 
     [Fact]
     public async Task GetAverageRatingAsync_WithNoReviews_ReturnsZero()
     {
-        // calls the method — item 999 has no reviews
         var average = await _repository.GetAverageRatingAsync(999);
-
-        // checks the result
         Assert.Equal(0, average);
     }
 
     [Fact]
     public async Task GetAllAsync_ReturnsAllReviews()
     {
-        // Sets Up
         await AddTestReviewAsync(rating: 5);
-
-        // calls the method
         var result = await _repository.GetAllAsync();
 
-        // checks the result
         Assert.NotNull(result);
         Assert.NotEmpty(result);
     }
@@ -136,14 +118,14 @@ public class ReviewRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task DeleteAsync_RemovesReviewFromDatabase()
     {
-        // Sets Up
+        // Arrange
         var added = await AddTestReviewAsync(rating: 2);
 
-        // calls the method
+        // Act
         await _repository.DeleteAsync(added.Id);
         var result = await _repository.GetByIdAsync(added.Id);
 
-        // checks the result
+        // Assert
         Assert.Null(result);
     }
 }

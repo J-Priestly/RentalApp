@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 using RentalApp.Database.Models;
 
 namespace RentalApp.Database.Data.Repositories;
@@ -31,6 +33,10 @@ public class ItemRepository : IItemRepository
 
     public async Task<Item> AddAsync(Item entity)
     {
+        // keeps the PostGIS point in sync with the lat/lng fields
+        var factory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+        entity.Location = factory.CreatePoint(new Coordinate(entity.Longitude, entity.Latitude));
+
         _context.Items.Add(entity);
         await _context.SaveChangesAsync();
         return entity;
@@ -68,4 +74,22 @@ public class ItemRepository : IItemRepository
             .Where(i => i.CategoryId == categoryId && i.IsAvailable)
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<Item>> GetNearbyItemsAsync(
+        double latitude, double longitude, double radiusMiles)
+    {
+        var radiusMetres = radiusMiles * 1609.344;
+        var factory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+        var userLocation = factory.CreatePoint(new Coordinate(longitude, latitude));
+
+        // ST_DWithin via EF Core spatial uses the geography (point) column index
+        return await _context.Items
+            .Where(i => i.IsAvailable
+                     && i.Location != null
+                     && i.Location.IsWithinDistance(userLocation, radiusMetres))
+            .Include(i => i.Owner)
+            .OrderBy(i => i.Location!.Distance(userLocation))
+            .ToListAsync();
+    }
+
 }

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RentalApp.Database.Data.Repositories;
 using RentalApp.Database.Models;
@@ -13,8 +13,14 @@ public partial class ItemsListViewModel : BaseViewModel
     private readonly INavigationService _navigationService;
     private readonly IItemRepository _itemRepository;
 
+    // Full unfiltered list
+    private List<Item> _allItems = new();
+
     [ObservableProperty]
     private ObservableCollection<Item> items = new();
+
+    [ObservableProperty]
+    private string searchText = string.Empty;
 
     public ItemsListViewModel(IApiService apiService, INavigationService navigationService, IItemRepository itemRepository)
     {
@@ -24,21 +30,60 @@ public partial class ItemsListViewModel : BaseViewModel
         Title = "Browse Items";
     }
 
+    partial void OnSearchTextChanged(string value) => ApplyFilter();
+
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            Items = new ObservableCollection<Item>(_allItems);
+            return;
+        }
+
+        var query = SearchText.Trim().ToLowerInvariant();
+        var filtered = _allItems.Where(i =>
+            i.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+            (i.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (i.Category?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false));
+
+        Items = new ObservableCollection<Item>(filtered);
+    }
+
     [RelayCommand]
     private async Task LoadItemsAsync()
     {
         if (IsBusy) return;
         IsBusy = true;
-        ClearError();
+        ResetError();
 
         try
         {
-            var result = await _apiService.GetItemsAsync();
-            Items = new ObservableCollection<Item>(result);
+            var result = await _itemRepository.GetAllAsync();
+            var list = result.ToList();
+
+            // if local DB is empty, pull from API instead
+            if (!list.Any())
+            {
+                var apiItems = await _apiService.GetItemsAsync();
+                list = apiItems.ToList();
+            }
+
+            _allItems = list;
+            ApplyFilter();
         }
         catch (Exception ex)
         {
-            SetError($"Failed to load items: {ex.Message}");
+            // local DB unavailable, try API as fallback
+            try
+            {
+                var apiItems = await _apiService.GetItemsAsync();
+                _allItems = apiItems.ToList();
+                ApplyFilter();
+            }
+            catch
+            {
+                SetError($"Failed to load items: {ex.Message}");
+            }
         }
         finally
         {
@@ -50,6 +95,12 @@ public partial class ItemsListViewModel : BaseViewModel
     private async Task GoToCreateItemAsync()
     {
         await _navigationService.NavigateToAsync("CreateItemPage");
+    }
+
+    [RelayCommand]
+    private async Task GoToNearbyItemsAsync()
+    {
+        await _navigationService.NavigateToAsync("NearbyItemsPage");
     }
 
     [RelayCommand]

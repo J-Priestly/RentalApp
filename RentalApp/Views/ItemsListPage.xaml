@@ -18,20 +18,31 @@
 			<Border.StrokeShape>
 				<RoundRectangle CornerRadius="24"/>
 			</Border.StrokeShape>
-			<SearchBar Placeholder="Search marketplace..."
+			<SearchBar Placeholder="Search by title, category or description..."
+                       Text="{Binding SearchText}"
                        BackgroundColor="Transparent"/>
 		</Border>
 
-		<!-- Rent Button -->
-		<Button Grid.Row="1" Text="+ Rent Something"
-                Command="{Binding GoToCreateItemCommand}"
-                Margin="12,10"
-                HeightRequest="48"
-                FontAttributes="Bold"
-                FontSize="16"
-                BackgroundColor="#1877F2"
-                TextColor="White"
-                CornerRadius="24"/>
+		<!-- Action Buttons -->
+		<Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="8" Margin="12,10">
+			<Button Text="+ List Item"
+                    Command="{Binding GoToCreateItemCommand}"
+                    HeightRequest="48"
+                    FontAttributes="Bold"
+                    FontSize="15"
+                    BackgroundColor="#1877F2"
+                    TextColor="White"
+                    CornerRadius="24"/>
+			<Button Grid.Column="1"
+                    Text="📍 Nearby"
+                    Command="{Binding GoToNearbyItemsCommand}"
+                    HeightRequest="48"
+                    FontAttributes="Bold"
+                    FontSize="15"
+                    BackgroundColor="#4CAF50"
+                    TextColor="White"
+                    CornerRadius="24"/>
+		</Grid>
 
 		<!-- Items Grid -->
 		<RefreshView Grid.Row="2"
@@ -65,19 +76,28 @@
 							</Border.GestureRecognizers>
 
 							<Grid RowDefinitions="160,Auto">
-								<!-- Placeholder Image Area -->
-								<Border Grid.Row="0"
-                                        BackgroundColor="{AppThemeBinding Light=#E8E8E8, Dark=#3A3A3A}"
-                                        StrokeThickness="0">
+								<!-- Placeholder Image Area — gradient + category label -->
+								<Border Grid.Row="0" StrokeThickness="0">
 									<Border.StrokeShape>
 										<RoundRectangle CornerRadius="12,12,0,0"/>
 									</Border.StrokeShape>
-									
+									<Border.Background>
+										<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+											<GradientStop Color="#DBEAFE" Offset="0.0"/>
+											<GradientStop Color="#BFDBFE" Offset="1.0"/>
+										</LinearGradientBrush>
+									</Border.Background>
+									<Label Text="{Binding Category}"
+                                           FontSize="13" FontAttributes="Bold"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center"
+                                           TextColor="#1877F2"
+                                           Opacity="0.65"/>
 								</Border>
 
 								<!-- Item Info -->
 								<VerticalStackLayout Grid.Row="1" Padding="12,10" Spacing="4">
-									<Label Text="{Binding DailyRate, StringFormat='{0:F2}/day'}"
+									<Label Text="{Binding DailyRate, StringFormat='£{0:F2}/day'}"
                                            FontSize="20"
                                            FontAttributes="Bold"
                                            TextColor="{AppThemeBinding Light=#222222, Dark=White}"/>
@@ -122,6 +142,32 @@
 			</CollectionView>
 
 		</RefreshView>
+
+		<!-- Loading Overlay -->
+		<Grid Grid.Row="0" Grid.RowSpan="3"
+              IsVisible="{Binding IsBusy}"
+              InputTransparent="True">
+			<BoxView BackgroundColor="{AppThemeBinding Light=#66F2F2F2, Dark=#661A1A1A}"/>
+			<Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0"
+                    HorizontalOptions="Center" VerticalOptions="Center"
+                    Padding="36,28">
+				<Border.StrokeShape>
+					<RoundRectangle CornerRadius="18"/>
+				</Border.StrokeShape>
+				<Border.Shadow>
+					<Shadow Brush="#40000000" Offset="0,4" Radius="16" Opacity="0.3"/>
+				</Border.Shadow>
+				<VerticalStackLayout Spacing="14" HorizontalOptions="Center">
+					<ActivityIndicator IsRunning="True" Color="#1877F2"
+                                       WidthRequest="44" HeightRequest="44"
+                                       HorizontalOptions="Center"/>
+					<Label Text="Loading…" FontSize="14"
+                           TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"
+                           HorizontalOptions="Center"/>
+				</VerticalStackLayout>
+			</Border>
+		</Grid>
 
 	</Grid>
 

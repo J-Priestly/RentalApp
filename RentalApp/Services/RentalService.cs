@@ -1,4 +1,5 @@
 ﻿using RentalApp.Database.Models;
+using RentalApp.Database.States;
 
 namespace RentalApp.Services;
 
@@ -35,7 +36,7 @@ public class RentalService : IRentalService
     public async Task<(bool Success, string Message, Rental? Rental)> RequestRentalAsync(
         int itemId, DateTime startDate, DateTime endDate)
     {
-        // Validates the dates
+        // Validates dates
         if (startDate >= endDate)
             return (false, "End date must be after start date", null);
 
@@ -63,8 +64,16 @@ public class RentalService : IRentalService
 
     public async Task<(bool Success, string Message)> ApproveRentalAsync(Rental rental)
     {
-        if (!IsValidTransition(rental.Status, RentalStatus.Approved))
-            return (false, $"Cannot approve a rental with status '{rental.Status}'");
+        try
+        {
+            
+            var state = RentalStateFactory.GetState(rental.Status);
+            state.Approve(); 
+        }
+        catch (InvalidOperationException ex)
+        {
+            return (false, ex.Message);
+        }
 
         var result = await _apiService.UpdateRentalStatusAsync(rental.Id, "Approved");
         return result != null
@@ -74,8 +83,15 @@ public class RentalService : IRentalService
 
     public async Task<(bool Success, string Message)> RejectRentalAsync(Rental rental)
     {
-        if (!IsValidTransition(rental.Status, RentalStatus.Rejected))
-            return (false, $"Cannot reject a rental with status '{rental.Status}'");
+        try
+        {
+            var state = RentalStateFactory.GetState(rental.Status);
+            state.Reject();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return (false, ex.Message);
+        }
 
         var result = await _apiService.UpdateRentalStatusAsync(rental.Id, "Rejected");
         return result != null

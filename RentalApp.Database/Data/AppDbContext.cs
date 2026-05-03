@@ -25,7 +25,8 @@ public class AppDbContext : DbContext
             .Build();
 
         optionsBuilder.UseNpgsql(
-            config.GetConnectionString("DevelopmentConnection")
+            config.GetConnectionString("DevelopmentConnection"),
+            o => o.UseNetTopologySuite()
         );
     }
 
@@ -82,6 +83,8 @@ public class AppDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.OwnerId)
                   .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(e => e.Location)
+                  .HasColumnType("geography (point)");
         });
 
         // Rental

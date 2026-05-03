@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using RentalApp.Database.Models;
 using RentalApp.Services;
 using Xunit;
@@ -16,8 +16,6 @@ public class ReviewServiceTests
         _reviewService = new ReviewService(_mockApiService.Object);
     }
 
-    // --- IsValidRating ---
-
     [Theory]
     [InlineData(1, true)]
     [InlineData(3, true)]
@@ -26,19 +24,14 @@ public class ReviewServiceTests
     [InlineData(6, false)]
     public void IsValidRating_ReturnsExpectedResult(int rating, bool expected)
     {
-        // calls the method
         var result = _reviewService.IsValidRating(rating);
-
-        // checks the result
         Assert.Equal(expected, result);
     }
-
-    // --- CalculateAverageRating ---
 
     [Fact]
     public void CalculateAverageRating_WithReviews_ReturnsCorrectAverage()
     {
-        // Sets Up
+        // Arrange
         var reviews = new List<Review>
         {
             new Review { Rating = 4 },
@@ -46,32 +39,25 @@ public class ReviewServiceTests
             new Review { Rating = 3 }
         };
 
-        // calls the method
+        // Act
         var result = _reviewService.CalculateAverageRating(reviews);
 
-        // checks the result
+        // Assert
         Assert.Equal(4.0, result);
     }
 
     [Fact]
     public void CalculateAverageRating_WithNoReviews_ReturnsZero()
     {
-        // calls the method
         var result = _reviewService.CalculateAverageRating(new List<Review>());
-
-        // checks the result
         Assert.Equal(0, result);
     }
-
-    // --- SubmitReviewAsync ---
 
     [Fact]
     public async Task SubmitReviewAsync_WithInvalidRating_ReturnsFailure()
     {
-        // Sets Up & calls the method
         var (success, message, review) = await _reviewService.SubmitReviewAsync(1, 1, 0, "Great!");
 
-        // checks the result
         Assert.False(success);
         Assert.Contains("Rating must be between 1 and 5", message);
         Assert.Null(review);
@@ -80,10 +66,8 @@ public class ReviewServiceTests
     [Fact]
     public async Task SubmitReviewAsync_WithEmptyComment_ReturnsFailure()
     {
-        // Sets Up & calls the method
         var (success, message, review) = await _reviewService.SubmitReviewAsync(1, 1, 5, "");
 
-        // checks the result
         Assert.False(success);
         Assert.Contains("comment", message);
         Assert.Null(review);
@@ -92,17 +76,17 @@ public class ReviewServiceTests
     [Fact]
     public async Task SubmitReviewAsync_WithValidData_ReturnsSuccess()
     {
-        // Sets Up
+        // Arrange
         var expectedReview = new Review { Id = 1, ItemId = 1, Rating = 5 };
 
         _mockApiService
             .Setup(s => s.CreateReviewAsync(1, 1, 5, "Great item!"))
             .ReturnsAsync(expectedReview);
 
-        // calls the method
+        // Act
         var (success, message, review) = await _reviewService.SubmitReviewAsync(1, 1, 5, "Great item!");
 
-        // checks the result
+        // Assert
         Assert.True(success);
         Assert.NotNull(review);
         Assert.Equal(5, review.Rating);

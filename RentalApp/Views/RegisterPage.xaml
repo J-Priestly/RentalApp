@@ -3,156 +3,177 @@
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:RentalApp.ViewModels"
-             Title="{Binding Title}">
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#F2F2F2, Dark=#1A1A1A}">
 
     <ContentPage.BindingContext>
         <vm:RegisterViewModel />
     </ContentPage.BindingContext>
 
     <ScrollView>
-        <Grid Padding="30" RowSpacing="20">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <VerticalStackLayout Spacing="0">
 
-            <!-- Header -->
-            <Label Grid.Row="0"
-                   Text="Create Account"
-                   FontSize="28"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"
-                   Margin="0,20,0,30"
-                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-
-            <!-- Error Message -->
-            <Border Grid.Row="1"
-                    BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#1B0000}"
-                    Stroke="{AppThemeBinding Light=#F44336, Dark=#EF5350}"
-                    StrokeThickness="1"
-                    Padding="15"
-                    IsVisible="{Binding HasError}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
-                <Label Text="{Binding ErrorMessage}"
-                       TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
-                       FontSize="14" />
+            <!-- Page Header -->
+            <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0" Padding="24,36,24,24" Margin="0,0,0,2">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Create Account"
+                           FontSize="28" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#222222, Dark=White}"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Join the community and start lending"
+                           FontSize="14"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+                </VerticalStackLayout>
             </Border>
 
-            <!-- First Name Entry -->
-            <Border Grid.Row="2"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
-                    StrokeThickness="1"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
-                <Entry Text="{Binding FirstName}"
-                       Placeholder="First Name"
-                       ReturnType="Next"
-                       Margin="15,10" />
+            <!-- Form Card -->
+            <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0" Padding="24,20" Margin="0,0,0,2">
+                <VerticalStackLayout Spacing="14">
+
+                    <!-- Error Banner -->
+                    <Border BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#1B0000}"
+                            Stroke="{AppThemeBinding Light=#F44336, Dark=#EF5350}"
+                            StrokeThickness="1" Padding="14,10"
+                            IsVisible="{Binding HasError}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+                        <Label Text="{Binding ErrorMessage}"
+                               TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                               FontSize="14"/>
+                    </Border>
+
+                    <!-- Name row -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="First Name" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#444444, Dark=#BBBBBB}"/>
+                            <Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#333333}"
+                                    StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                    Padding="4,0">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Entry Text="{Binding FirstName}"
+                                       Placeholder="First name"
+                                       ReturnType="Next"
+                                       BackgroundColor="Transparent"/>
+                            </Border>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="6">
+                            <Label Text="Last Name" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#444444, Dark=#BBBBBB}"/>
+                            <Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#333333}"
+                                    StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                    Padding="4,0">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="10"/>
+                                </Border.StrokeShape>
+                                <Entry Text="{Binding LastName}"
+                                       Placeholder="Last name"
+                                       ReturnType="Next"
+                                       BackgroundColor="Transparent"/>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Email -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Email" FontSize="13" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#444444, Dark=#BBBBBB}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#333333}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Entry Text="{Binding Email}"
+                                   Placeholder="you@example.com"
+                                   Keyboard="Email"
+                                   ReturnType="Next"
+                                   BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Password -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Password" FontSize="13" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#444444, Dark=#BBBBBB}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#333333}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Entry Text="{Binding Password}"
+                                   Placeholder="Create a password"
+                                   IsPassword="True"
+                                   ReturnType="Next"
+                                   BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Confirm Password -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Confirm Password" FontSize="13" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#444444, Dark=#BBBBBB}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#333333}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Entry Text="{Binding ConfirmPassword}"
+                                   Placeholder="Repeat password"
+                                   IsPassword="True"
+                                   ReturnType="Done"
+                                   BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Terms -->
+                    <HorizontalStackLayout Spacing="8">
+                        <CheckBox IsChecked="{Binding AcceptTerms}" Color="#1877F2"/>
+                        <Label Text="I accept the terms and conditions"
+                               VerticalOptions="Center" FontSize="14"
+                               TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                    </HorizontalStackLayout>
+
+                    <!-- Register Button -->
+                    <Button Text="Create Account"
+                            Command="{Binding RegisterCommand}"
+                            BackgroundColor="#1877F2"
+                            TextColor="White"
+                            HeightRequest="52"
+                            CornerRadius="26"
+                            FontSize="16"
+                            FontAttributes="Bold"/>
+
+                    <!-- Activity Indicator -->
+                    <ActivityIndicator IsVisible="{Binding IsBusy}"
+                                       IsRunning="{Binding IsBusy}"
+                                       Color="#1877F2"
+                                       HorizontalOptions="Center"/>
+
+                </VerticalStackLayout>
             </Border>
 
-            <!-- Last Name Entry -->
-            <Border Grid.Row="3"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
-                    StrokeThickness="1"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
-                <Entry Text="{Binding LastName}"
-                       Placeholder="Last Name"
-                       ReturnType="Next"
-                       Margin="15,10" />
-            </Border>
+            <!-- Back to Login -->
+            <Button Text="Already have an account? Sign in"
+                    Command="{Binding NavigateBackToLoginCommand}"
+                    Margin="16,12,16,32"
+                    BackgroundColor="Transparent"
+                    TextColor="#1877F2"
+                    FontSize="14"/>
 
-            <!-- Email Entry -->
-            <Border Grid.Row="4"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
-                    StrokeThickness="1"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
-                <Entry Text="{Binding Email}"
-                       Placeholder="Email"
-                       Keyboard="Email"
-                       ReturnType="Next"
-                       Margin="15,10" />
-            </Border>
-
-            <!-- Password Entry -->
-            <Border Grid.Row="5"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
-                    StrokeThickness="1"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
-                <Entry Text="{Binding Password}"
-                       Placeholder="Password"
-                       IsPassword="True"
-                       ReturnType="Next"
-                       Margin="15,10" />
-            </Border>
-
-            <!-- Confirm Password Entry -->
-            <Border Grid.Row="6"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
-                    StrokeThickness="1"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
-                <Entry Text="{Binding ConfirmPassword}"
-                       Placeholder="Confirm Password"
-                       IsPassword="True"
-                       ReturnType="Done"
-                       Margin="15,10" />
-            </Border>
-
-            <!-- Terms and Conditions -->
-            <StackLayout Grid.Row="7" Orientation="Horizontal" HorizontalOptions="Start">
-                <CheckBox IsChecked="{Binding AcceptTerms}" />
-                <Label Text="I accept the terms and conditions" 
-                       VerticalOptions="Center" 
-                       FontSize="14" />
-            </StackLayout>
-
-            <!-- Register Button -->
-            <Button Grid.Row="8"
-                    Text="Create Account"
-                    Command="{Binding RegisterCommand}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    TextColor="White"
-                    HeightRequest="50"
-                    CornerRadius="8"
-                    FontSize="16"
-                    FontAttributes="Bold"
-                    IsEnabled="true" />
-
-            <!-- Footer -->
-            <StackLayout Grid.Row="9" Spacing="10" Margin="0,20,0,0">
-                <ActivityIndicator IsVisible="{Binding IsBusy}"
-                                  IsRunning="{Binding IsBusy}"
-                                  Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                
-                <Button Text="Already have an account? Login"
-                        Command="{Binding NavigateBackToLoginCommand}"
-                        BackgroundColor="Transparent"
-                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        FontSize="14" />
-            </StackLayout>
-        </Grid>
+        </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

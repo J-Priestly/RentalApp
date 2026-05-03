@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pick Location</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; }
+        #search-box {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; gap: 6px; width: 90%;
+        }
+        #search-input {
+            flex: 1; padding: 8px 12px; border: 1px solid #ccc;
+            border-radius: 6px; font-size: 14px;
+        }
+        #search-btn {
+            padding: 8px 14px; background: #1877F2; color: white;
+            border: none; border-radius: 6px; cursor: pointer; font-size: 14px;
+        }
+        #map { width: 100%; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="search-box">
+        <input id="search-input" type="text" placeholder="Search postcode or address..."/>
+        <button id="search-btn" onclick="searchAddress()">Go</button>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([55.9533, -3.1883], 13);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap contributors © CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        var circle = null;
+
+        function placeCircle(lat, lng, address) {
+            if (circle) map.removeLayer(circle);
+            circle = L.circle([lat, lng], {
+                radius: 500,
+                color: '#1877F2',
+                fillColor: '#1877F2',
+                fillOpacity: 0.15,
+                weight: 2
+            }).addTo(map);
+            sendToMaui(lat.toFixed(6), lng.toFixed(6), address);
+        }
+
+        map.on('click', function(e) {
+            placeCircle(e.latlng.lat, e.latlng.lng, 'Custom location');
+        });
+
+        function searchAddress() {
+            var query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+            fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=gb&q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data && data.length > 0) {
+                        var lat = parseFloat(data[0].lat);
+                        var lng = parseFloat(data[0].lon);
+                        var address = data[0].display_name;
+                        map.setView([lat, lng], 15);
+                        placeCircle(lat, lng, address);
+                    } else {
+                        alert('Address not found. Try a different postcode or address.');
+                    }
+                })
+                .catch(function() { alert('Search failed. Check your connection.'); });
+        }
+
+        document.getElementById('search-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') searchAddress();
+        });
+
+        function sendToMaui(lat, lng, address) {
+            window.location.href = 'map://set?lat=' + lat + '&lng=' + lng
+                + '&address=' + encodeURIComponent(address);
+        }
+
+        function setInitialPosition(lat, lng) {
+            map.setView([lat, lng], 13);
+            if (circle) map.removeLayer(circle);
+            circle = L.circle([lat, lng], {
+                radius: 500,
+                color: '#1877F2',
+                fillColor: '#1877F2',
+                fillOpacity: 0.15,
+                weight: 2
+            }).addTo(map);
+        }
+
+        
+    </script>
+</body>
+</html>

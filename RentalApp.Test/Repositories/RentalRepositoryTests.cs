@@ -20,12 +20,8 @@ public class RentalRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetAllAsync_ReturnsAllRentals()
     {
-        // Sets Up — seeded in DatabaseFixture
-
-        // calls the method
         var result = await _repository.GetAllAsync();
 
-        // checks the result
         Assert.NotNull(result);
         Assert.NotEmpty(result);
     }
@@ -33,13 +29,13 @@ public class RentalRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetByIdAsync_WithValidId_ReturnsRental()
     {
-        // Sets Up
+        // Arrange
         var expectedId = 1;
 
-        // calls the method
+        // Act
         var result = await _repository.GetByIdAsync(expectedId);
 
-        // checks the result
+        // Assert
         Assert.NotNull(result);
         Assert.Equal(expectedId, result.Id);
         Assert.Equal(RentalStatus.Requested, result.Status);
@@ -48,62 +44,42 @@ public class RentalRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetByIdAsync_WithInvalidId_ReturnsNull()
     {
-        // Sets Up
-        var invalidId = 999;
-
-        // calls the method
-        var result = await _repository.GetByIdAsync(invalidId);
-
-        // checks the result
+        var result = await _repository.GetByIdAsync(999);
         Assert.Null(result);
     }
 
     [Fact]
     public async Task GetByBorrowerAsync_ReturnsBorrowerRentals()
     {
-        // Sets Up — seeded rental has BorrowerId = 2
-        var borrowerId = 2;
+        // seeded rental has BorrowerId = 2
+        var result = await _repository.GetByBorrowerAsync(2);
 
-        // calls the method
-        var result = await _repository.GetByBorrowerAsync(borrowerId);
-
-        // checks the result
         Assert.NotNull(result);
-        Assert.All(result, r => Assert.Equal(borrowerId, r.BorrowerId));
+        Assert.All(result, r => Assert.Equal(2, r.BorrowerId));
     }
 
     [Fact]
     public async Task GetByBorrowerAsync_WithUnknownBorrower_ReturnsEmpty()
     {
-        // Sets Up
-        var unknownBorrowerId = 999;
-
-        // calls the method
-        var result = await _repository.GetByBorrowerAsync(unknownBorrowerId);
-
-        // checks the result
+        var result = await _repository.GetByBorrowerAsync(999);
         Assert.Empty(result);
     }
 
     [Fact]
     public async Task GetByItemOwnerAsync_ReturnsOwnerRentals()
     {
-        // Sets Up — seeded item has OwnerId = 1
-        var ownerId = 1;
+        // seeded item has OwnerId = 1
+        var result = await _repository.GetByItemOwnerAsync(1);
 
-        // calls the method
-        var result = await _repository.GetByItemOwnerAsync(ownerId);
-
-        // checks the result
         Assert.NotNull(result);
         Assert.NotEmpty(result);
-        Assert.All(result, r => Assert.Equal(ownerId, r.Item!.OwnerId));
+        Assert.All(result, r => Assert.Equal(1, r.Item!.OwnerId));
     }
 
     [Fact]
     public async Task AddAsync_AddsRentalToDatabase()
     {
-        // Sets Up
+        // Arrange
         var newRental = new Rental
         {
             ItemId = 1,
@@ -116,11 +92,11 @@ public class RentalRepositoryTests : IClassFixture<DatabaseFixture>
             UpdatedAt = DateTime.UtcNow
         };
 
-        // calls the method
+        // Act
         var added = await _repository.AddAsync(newRental);
         var result = await _repository.GetByIdAsync(added.Id);
 
-        // checks the result
+        // Assert
         Assert.NotNull(result);
         Assert.Equal(RentalStatus.Requested, result.Status);
     }
@@ -128,16 +104,13 @@ public class RentalRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task UpdateAsync_UpdatesRentalStatus()
     {
-        // Sets Up
         var rental = await _repository.GetByIdAsync(1);
         Assert.NotNull(rental);
         rental.Status = RentalStatus.Approved;
 
-        // calls the method
         await _repository.UpdateAsync(rental);
         var result = await _repository.GetByIdAsync(1);
 
-        // checks the result
         Assert.NotNull(result);
         Assert.Equal(RentalStatus.Approved, result.Status);
     }
@@ -145,7 +118,7 @@ public class RentalRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task DeleteAsync_RemovesRentalFromDatabase()
     {
-        // Sets Up — add a rental to delete so we don't break other tests
+        // add a rental first so we don't break other tests
         var rentalToDelete = new Rental
         {
             ItemId = 1,
@@ -159,11 +132,9 @@ public class RentalRepositoryTests : IClassFixture<DatabaseFixture>
         };
         var added = await _repository.AddAsync(rentalToDelete);
 
-        // calls the method
         await _repository.DeleteAsync(added.Id);
         var result = await _repository.GetByIdAsync(added.Id);
 
-        // checks the result
         Assert.Null(result);
     }
 }

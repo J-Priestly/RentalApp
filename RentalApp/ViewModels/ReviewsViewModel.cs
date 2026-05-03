@@ -57,7 +57,7 @@ public partial class ReviewsViewModel : BaseViewModel
     {
         if (IsBusy || ItemId == 0) return;
         IsBusy = true;
-        ClearError();
+        ResetError();
 
         try
         {
@@ -80,7 +80,7 @@ public partial class ReviewsViewModel : BaseViewModel
     {
         if (IsBusy || RentalId == 0) return;
         IsBusy = true;
-        ClearError();
+        ResetError();
 
         try
         {

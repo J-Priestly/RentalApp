@@ -20,12 +20,8 @@ public class ItemRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetAllAsync_ReturnsAllAvailableItems()
     {
-        // Sets Up — seeded in DatabaseFixture
-
-        // calls the method
         var result = await _repository.GetAllAsync();
 
-        // checks the result
         Assert.NotNull(result);
         Assert.NotEmpty(result);
     }
@@ -33,13 +29,11 @@ public class ItemRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetByIdAsync_WithValidId_ReturnsItem()
     {
-        // Sets Up
+        // Arrange
         var expectedId = 1;
 
-        // calls the method
         var result = await _repository.GetByIdAsync(expectedId);
 
-        // checks the result
         Assert.NotNull(result);
         Assert.Equal(expectedId, result.Id);
         Assert.Equal("Test Drill", result.Title);
@@ -48,20 +42,15 @@ public class ItemRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task GetByIdAsync_WithInvalidId_ReturnsNull()
     {
-        // Sets Up
-        var invalidId = 999;
+        var result = await _repository.GetByIdAsync(999);
 
-        // calls the method
-        var result = await _repository.GetByIdAsync(invalidId);
-
-        // checks the result
         Assert.Null(result);
     }
 
     [Fact]
     public async Task AddAsync_AddsItemToDatabase()
     {
-        // Sets Up
+        // Arrange
         var newItem = new Item
         {
             Title = "New Ladder",
@@ -76,11 +65,11 @@ public class ItemRepositoryTests : IClassFixture<DatabaseFixture>
             UpdatedAt = DateTime.UtcNow
         };
 
-        // calls the method
+        // Act
         var added = await _repository.AddAsync(newItem);
         var result = await _repository.GetByIdAsync(added.Id);
 
-        // checks the result
+        // Assert
         Assert.NotNull(result);
         Assert.Equal("New Ladder", result.Title);
     }
@@ -88,14 +77,9 @@ public class ItemRepositoryTests : IClassFixture<DatabaseFixture>
     [Fact]
     public async Task DeleteAsync_SoftDeletesItem_NotReturnedInList()
     {
-        // Sets Up — ItemRepository.DeleteAsync sets IsAvailable=false (soft delete)
-        var existingId = 1;
-
-        // calls the method
-        await _repository.DeleteAsync(existingId);
+        await _repository.DeleteAsync(1);
         var allItems = await _repository.GetAllAsync();
 
-        // checks the result — item no longer appears in the available items list
-        Assert.DoesNotContain(allItems, i => i.Id == existingId);
+        Assert.DoesNotContain(allItems, i => i.Id == 1);
     }
 }

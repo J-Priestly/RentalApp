@@ -60,8 +60,14 @@ public static class MauiProgram
         builder.Services.AddSingleton<TempViewModel>();
         builder.Services.AddTransient<TempPage>();
 
+        builder.Services.AddTransient<ProfileViewModel>();
+        builder.Services.AddTransient<ProfilePage>();
+
         builder.Services.AddSingleton<IRentalService, RentalService>();
         builder.Services.AddSingleton<IReviewService, ReviewService>();
+        builder.Services.AddSingleton<ILocationService, LocationService>();
+        builder.Services.AddTransient<NearbyItemsViewModel>();
+        builder.Services.AddTransient<NearbyItemsPage>();
 
 
 
