@@ -11,7 +11,6 @@ public partial class NearbyItemsViewModel : BaseViewModel
 {
     private readonly ILocationService _locationService;
     private readonly IItemRepository _itemRepository;
-    private readonly IApiService _apiService;
     private readonly INavigationService _navigationService;
 
     [ObservableProperty]
@@ -26,12 +25,10 @@ public partial class NearbyItemsViewModel : BaseViewModel
     public NearbyItemsViewModel(
         ILocationService locationService,
         IItemRepository itemRepository,
-        IApiService apiService,
         INavigationService navigationService)
     {
         _locationService = locationService;
         _itemRepository = itemRepository;
-        _apiService = apiService;
         _navigationService = navigationService;
         Title = "Nearby Items";
     }
@@ -58,26 +55,14 @@ public partial class NearbyItemsViewModel : BaseViewModel
             var (lat, lng) = position.Value;
             LocationStatus = $"Searching within {RadiusMiles:F0} miles of your location...";
 
-            // Try local DB first, fall back to API
-            IEnumerable<Item> items;
-            try
-            {
-                items = await _itemRepository.GetNearbyItemsAsync(lat, lng, RadiusMiles);
-            }
-            catch
-            {
-                var apiItems = await _apiService.GetItemsAsync();
-                items = apiItems.Where(i =>
-                    ItemRepository.CalculateDistanceMiles(lat, lng, i.Latitude, i.Longitude) <= RadiusMiles);
-            }
+            var results = await _itemRepository.GetNearbyItemsAsync(lat, lng, RadiusMiles);
 
-            var sorted = items
-                .Select(i => new NearbyItemDisplay
+            var sorted = results
+                .Select(r => new NearbyItemDisplay
                 {
-                    Item = i,
-                    DistanceMiles = ItemRepository.CalculateDistanceMiles(lat, lng, i.Latitude, i.Longitude)
+                    Item = r.Item,
+                    DistanceMiles = r.DistanceMiles
                 })
-                .OrderBy(x => x.DistanceMiles)
                 .ToList();
 
             NearbyItems = new ObservableCollection<NearbyItemDisplay>(sorted);

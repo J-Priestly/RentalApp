@@ -75,20 +75,25 @@ public class ItemRepository : IItemRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Item>> GetNearbyItemsAsync(
+    public async Task<IEnumerable<NearbyItemResult>> GetNearbyItemsAsync(
         double latitude, double longitude, double radiusMiles)
     {
         var radiusMetres = radiusMiles * 1609.344;
         var factory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
         var userLocation = factory.CreatePoint(new Coordinate(longitude, latitude));
 
-        // ST_DWithin via EF Core spatial uses the geography (point) column index
+        // ST_DWithin filters, ST_Distance returns metres — divide by 1609.344 for miles
         return await _context.Items
             .Where(i => i.IsAvailable
                      && i.Location != null
                      && i.Location.IsWithinDistance(userLocation, radiusMetres))
             .Include(i => i.Owner)
-            .OrderBy(i => i.Location!.Distance(userLocation))
+            .Select(i => new NearbyItemResult
+            {
+                Item = i,
+                DistanceMiles = i.Location!.Distance(userLocation) / 1609.344
+            })
+            .OrderBy(r => r.DistanceMiles)
             .ToListAsync();
     }
 
