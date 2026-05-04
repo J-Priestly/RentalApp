@@ -4,121 +4,134 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:RentalApp.ViewModels"
              Title="{Binding Title}"
-             Shell.NavBarIsVisible="False">
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{AppThemeBinding Light=#F2F2F2, Dark=#1A1A1A}">
 
     <ContentPage.BindingContext>
         <vm:LoginViewModel />
     </ContentPage.BindingContext>
 
     <ScrollView>
-        <Grid Padding="30" RowSpacing="20" VerticalOptions="Center">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
+        <VerticalStackLayout Spacing="0">
 
-            <!-- App Logo/Title -->
-            <Label Grid.Row="0"
-                   Text="RentalApp"
-                   FontSize="32"
-                   FontAttributes="Bold"
-                   HorizontalOptions="Center"
-                   Margin="0,0,0,30"
-                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-
-            <!-- Error Message -->
-            <Border Grid.Row="1"
-                    BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#1B0000}"
-                    Stroke="{AppThemeBinding Light=#F44336, Dark=#EF5350}"
-                    StrokeThickness="1"
-                    Padding="15"
-                    IsVisible="{Binding HasError}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
-                <Label Text="{Binding ErrorMessage}"
-                       TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
-                       FontSize="14" />
+            <!-- App Name Block -->
+            <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0" Padding="32,52,32,32" Margin="0,0,0,2">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="RentalApp"
+                           FontSize="34" FontAttributes="Bold"
+                           TextColor="#1877F2"
+                           HorizontalOptions="Center"/>
+                    <Label Text="Sign in to your account"
+                           FontSize="15"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"/>
+                </VerticalStackLayout>
             </Border>
 
-            <!-- Email Entry -->
-            <Border Grid.Row="2"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
-                    StrokeThickness="1"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
-                <Entry x:Name="EmailEntry"
-                       Text="{Binding Email}"
-                       Placeholder="Email"
-                       Keyboard="Email"
-                       ReturnType="Next"
-                       Margin="15,10" />
+            <!-- Form Card -->
+            <Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                    StrokeThickness="0" Padding="24,20" Margin="0,0,0,2">
+                <VerticalStackLayout Spacing="16">
+
+                    <!-- Error Banner -->
+                    <Border BackgroundColor="{AppThemeBinding Light=#FFEBEE, Dark=#1B0000}"
+                            Stroke="{AppThemeBinding Light=#F44336, Dark=#EF5350}"
+                            StrokeThickness="1" Padding="14,10"
+                            IsVisible="{Binding HasError}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10"/>
+                        </Border.StrokeShape>
+                        <Label Text="{Binding ErrorMessage}"
+                               TextColor="{AppThemeBinding Light=#D32F2F, Dark=#EF5350}"
+                               FontSize="14"/>
+                    </Border>
+
+                    <!-- Email -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Email" FontSize="13" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#444444, Dark=#BBBBBB}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#333333}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Entry x:Name="EmailEntry"
+                                   Text="{Binding Email}"
+                                   Placeholder="you@example.com"
+                                   Keyboard="Email"
+                                   ReturnType="Next"
+                                   BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Password -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Password" FontSize="13" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#444444, Dark=#BBBBBB}"/>
+                        <Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#333333}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+                            <Entry x:Name="PasswordEntry"
+                                   Text="{Binding Password}"
+                                   Placeholder="Password"
+                                   IsPassword="True"
+                                   ReturnType="Done"
+                                   BackgroundColor="Transparent"/>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Remember Me -->
+                    <HorizontalStackLayout Spacing="8">
+                        <CheckBox IsChecked="{Binding RememberMe}" Color="#1877F2"/>
+                        <Label Text="Remember me" VerticalOptions="Center" FontSize="14"
+                               TextColor="{AppThemeBinding Light=#555555, Dark=#AAAAAA}"/>
+                    </HorizontalStackLayout>
+
+                    <!-- Login Button -->
+                    <Button Text="Sign In"
+                            Command="{Binding LoginCommand}"
+                            BackgroundColor="#1877F2"
+                            TextColor="White"
+                            HeightRequest="52"
+                            CornerRadius="26"
+                            FontSize="16"
+                            FontAttributes="Bold"/>
+
+                    <!-- Activity Indicator -->
+                    <ActivityIndicator IsVisible="{Binding IsBusy}"
+                                       IsRunning="{Binding IsBusy}"
+                                       Color="#1877F2"
+                                       HorizontalOptions="Center"/>
+
+                </VerticalStackLayout>
             </Border>
-
-            <!-- Password Entry -->
-            <Border Grid.Row="3"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray300}, Dark={StaticResource Gray600}}"
-                    StrokeThickness="1"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
-                </Border.StrokeShape>
-                <Entry x:Name="PasswordEntry"
-                       Text="{Binding Password}"
-                       Placeholder="Password"
-                       IsPassword="True"
-                       ReturnType="Done"
-                       Margin="15,10" />
-            </Border>
-
-            <!-- Remember Me -->
-            <StackLayout Grid.Row="4" Orientation="Horizontal" HorizontalOptions="Start">
-                <CheckBox IsChecked="{Binding RememberMe}" />
-                <Label Text="Remember me" VerticalOptions="Center" />
-            </StackLayout>
-
-            <!-- Login Button -->
-            <Button Grid.Row="5"
-                    Text="Login"
-                    Command="{Binding LoginCommand}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    TextColor="White"
-                    HeightRequest="50"
-                    CornerRadius="8"
-                    FontSize="16"
-                    FontAttributes="Bold" />
-
-            <!-- Loading Indicator -->
-            <ActivityIndicator Grid.Row="6"
-                              IsVisible="{Binding IsBusy}"
-                              IsRunning="{Binding IsBusy}"
-                              Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
 
             <!-- Footer Links -->
-            <StackLayout Grid.Row="7" Spacing="10" Margin="0,20,0,0">
+            <VerticalStackLayout Spacing="10" Margin="16,16,16,32">
                 <Button Text="Create Account"
                         Command="{Binding NavigateToRegisterCommand}"
                         BackgroundColor="Transparent"
-                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        BorderWidth="1"
-                        BorderColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        HeightRequest="45"
-                        CornerRadius="8" />
-                
-                <Button Text="Forgot Password?"
+                        TextColor="#1877F2"
+                        BorderColor="#1877F2"
+                        BorderWidth="1.5"
+                        HeightRequest="50"
+                        CornerRadius="25"
+                        FontSize="15"
+                        FontAttributes="Bold"/>
+                <Button Text="Forgot password?"
                         Command="{Binding ForgotPasswordCommand}"
                         BackgroundColor="Transparent"
-                        TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray400}}"
-                        FontSize="14" />
-            </StackLayout>
-        </Grid>
+                        TextColor="{AppThemeBinding Light=#999999, Dark=#666666}"
+                        FontSize="14"/>
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using RentalApp.Database.Data;
 
@@ -20,6 +21,7 @@ namespace RentalApp.Database.Migrations
                 .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("RentalApp.Database.Models.Item", b =>
@@ -43,14 +45,14 @@ namespace RentalApp.Database.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsAvailabe")
+                    b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
-
-                    b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");
+
+                    b.Property<Point>("Location")
+                        .HasColumnType("geography (point)");
 
                     b.Property<double>("Longitude")
                         .HasColumnType("double precision");
@@ -62,6 +64,9 @@ namespace RentalApp.Database.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 

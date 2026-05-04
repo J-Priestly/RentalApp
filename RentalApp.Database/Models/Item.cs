@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
 
 
 
@@ -28,6 +29,10 @@ namespace RentalApp.Database.Models
 
         public double Latitude { get; set; }
         public double Longitude { get; set; }
+
+        // PostGIS geography point keeps it in sync with Latitude/Longitude
+        [Column(TypeName = "geography (point)")]
+        public Point? Location { get; set; }
 
         [Required]
         public int OwnerId { get; set; }

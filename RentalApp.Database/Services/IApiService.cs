@@ -1,4 +1,4 @@
-﻿using RentalApp.Database.Models;
+using RentalApp.Database.Models;
 
 namespace RentalApp.Services;
 
@@ -11,10 +11,8 @@ public interface IApiService
     Task<ApiTokenResponse?> LoginAsync(string email, string password);
     Task<ApiRegisterResponse?> RegisterAsync(string firstName, string lastName, string email, string password);
 
-
     // Categories
     Task<IEnumerable<Category>> GetCategoriesAsync();
-
 
     // Items
     Task<IEnumerable<Item>> GetItemsAsync();
@@ -22,14 +20,15 @@ public interface IApiService
     Task<Item?> CreateItemAsync(string title, string description, decimal dailyRate, int categoryId, double latitude, double longitude);
     Task<Item?> UpdateItemAsync(int id, string title, string description, decimal dailyRate, int categoryId, double latitude, double longitude);
 
-
     // Rentals
     Task<Rental?> CreateRentalAsync(int itemId, DateTime startDate, DateTime endDate);
     Task<IEnumerable<Rental>> GetIncomingRentalsAsync();
     Task<IEnumerable<Rental>> GetOutgoingRentalsAsync();
     Task<ApiStatusResponse?> UpdateRentalStatusAsync(int id, string status);
 
-
+    // Reviews
+    Task<IEnumerable<Review>> GetReviewsAsync(int itemId);
+    Task<Review?> CreateReviewAsync(int itemId, int rentalId, int rating, string comment);
 }
 
 public class ApiTokenResponse

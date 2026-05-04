@@ -1,32 +1,52 @@
-name: build
+name: Build and Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feature/tier1-core ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, feature/tier1-core ]
 
 jobs:
-  build:
-    runs-on: windows-latest
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: rentalapp
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
 
-    - name: Install MAUI workload
-      run: dotnet workload install maui-windows
+      - name: Create appsettings.json
+        run: |
+          echo '{
+            "ConnectionStrings": {
+              "DevelopmentConnection": "Host=localhost;Username=ci;Password=ci;Database=rentalapp"
+            }
+          }' > RentalApp.Database/appsettings.json
 
-    - name: Create appsettings.json
-      run: |
-        Copy-Item RentalApp.Database/appsettings.json.template RentalApp.Database/appsettings.json
+      - name: Restore dependencies
+        run: dotnet restore RentalApp.Database/RentalApp.Database.csproj
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Build
+        run: dotnet build RentalApp.Database/RentalApp.Database.csproj --no-restore
 
-    - name: Build
-      run: dotnet build --no-restore -c Debug
+      - name: Run tests with coverage
+        run: dotnet test RentalApp.Test/RentalApp.Test.csproj --collect:"XPlat Code Coverage" --settings RentalApp.Test/test.runsettings

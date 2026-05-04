@@ -1,8 +1,9 @@
-﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using RentalApp.Database.Data.Repositories;
 using RentalApp.Database.Models;
 using RentalApp.Services;
+using System.Collections.ObjectModel;
 
 namespace RentalApp.ViewModels;
 
@@ -10,15 +11,42 @@ public partial class ItemsListViewModel : BaseViewModel
 {
     private readonly IApiService _apiService;
     private readonly INavigationService _navigationService;
+    private readonly IItemRepository _itemRepository;
+
+    // Full unfiltered list
+    private List<Item> _allItems = new();
 
     [ObservableProperty]
     private ObservableCollection<Item> items = new();
 
-    public ItemsListViewModel(IApiService apiService, INavigationService navigationService)
+    [ObservableProperty]
+    private string searchText = string.Empty;
+
+    public ItemsListViewModel(IApiService apiService, INavigationService navigationService, IItemRepository itemRepository)
     {
         _apiService = apiService;
         _navigationService = navigationService;
+        _itemRepository = itemRepository;
         Title = "Browse Items";
+    }
+
+    partial void OnSearchTextChanged(string value) => ApplyFilter();
+
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            Items = new ObservableCollection<Item>(_allItems);
+            return;
+        }
+
+        var query = SearchText.Trim().ToLowerInvariant();
+        var filtered = _allItems.Where(i =>
+            i.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+            (i.Description?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (i.Category?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false));
+
+        Items = new ObservableCollection<Item>(filtered);
     }
 
     [RelayCommand]
@@ -26,16 +54,28 @@ public partial class ItemsListViewModel : BaseViewModel
     {
         if (IsBusy) return;
         IsBusy = true;
-        ClearError();
+        ResetError();
 
         try
         {
-            var result = await _apiService.GetItemsAsync();
-            Items = new ObservableCollection<Item>(result);
+            // pull from API so all items are visible
+            var apiItems = await _apiService.GetItemsAsync();
+            _allItems = apiItems.ToList();
+            ApplyFilter();
         }
-        catch (Exception ex)
+        catch
         {
-            SetError($"Failed to load items: {ex.Message}");
+            // API unavailable, fall back to local DB
+            try
+            {
+                var result = await _itemRepository.GetAllAsync();
+                _allItems = result.ToList();
+                ApplyFilter();
+            }
+            catch (Exception ex)
+            {
+                SetError($"Failed to load items: {ex.Message}");
+            }
         }
         finally
         {
@@ -47,6 +87,12 @@ public partial class ItemsListViewModel : BaseViewModel
     private async Task GoToCreateItemAsync()
     {
         await _navigationService.NavigateToAsync("CreateItemPage");
+    }
+
+    [RelayCommand]
+    private async Task GoToNearbyItemsAsync()
+    {
+        await _navigationService.NavigateToAsync("NearbyItemsPage");
     }
 
     [RelayCommand]

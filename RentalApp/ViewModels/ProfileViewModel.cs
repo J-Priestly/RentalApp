@@ -61,6 +61,20 @@ public partial class ProfileViewModel : BaseViewModel
 
     /// @brief Loads the current user's profile data
     /// @details Retrieves the current user's information from the authentication service
+
+    public string Initials
+    {
+        get
+        {
+            if (CurrentUser == null) return "?";
+            var f = CurrentUser.FirstName?.Length > 0 ? CurrentUser.FirstName[0].ToString().ToUpper() : "";
+            var l = CurrentUser.LastName?.Length > 0  ? CurrentUser.LastName[0].ToString().ToUpper()  : "";
+            return f + l;
+        }
+    }
+
+    partial void OnCurrentUserChanged(User? value) => OnPropertyChanged(nameof(Initials));
+
     private void LoadUserData()
     {
         CurrentUser = _authService.CurrentUser;
@@ -81,7 +95,7 @@ public partial class ProfileViewModel : BaseViewModel
         try
         {
             IsBusy = true;
-            ClearError();
+            ResetError();
 
             var success = await _authService.ChangePasswordAsync(CurrentPassword, NewPassword);
 
@@ -115,7 +129,7 @@ public partial class ProfileViewModel : BaseViewModel
         if (!IsChangingPassword)
         {
             ClearPasswordFields();
-            ClearError();
+            ResetError();
         }
     }
 

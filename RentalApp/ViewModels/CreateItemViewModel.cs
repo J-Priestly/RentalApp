@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using RentalApp.Database.Data.Repositories;
 using RentalApp.Database.Models;
 using RentalApp.Services;
 
@@ -10,15 +11,16 @@ public partial class CreateItemViewModel : BaseViewModel
 {
     private readonly IApiService _apiService;
     private readonly INavigationService _navigationService;
+    private readonly IItemRepository _itemRepository;
 
     [ObservableProperty]
-    private string itemTitle = string.Empty;
+    private string itemTitle = "";
 
     [ObservableProperty]
-    private string description = string.Empty;
+    private string description = "";
 
     [ObservableProperty]
-    private string dailyRate = string.Empty;
+    private string dailyRate = "";
 
     [ObservableProperty]
     private ObservableCollection<Category> categories = new();
@@ -32,10 +34,14 @@ public partial class CreateItemViewModel : BaseViewModel
     [ObservableProperty]
     private string longitude = "-3.1883";
 
-    public CreateItemViewModel(IApiService apiService, INavigationService navigationService)
+    [ObservableProperty]
+    private string addressDisplay = "No location selected — search or tap the map";
+
+    public CreateItemViewModel(IApiService apiService, INavigationService navigationService, IItemRepository itemRepository)
     {
         _apiService = apiService;
         _navigationService = navigationService;
+        _itemRepository = itemRepository;
         Title = "List New Item";
     }
 
@@ -78,7 +84,7 @@ public partial class CreateItemViewModel : BaseViewModel
         { SetError("Please enter a valid longitude"); return; }
 
         IsBusy = true;
-        ClearError();
+        ResetError();
 
         try
         {
@@ -88,6 +94,15 @@ public partial class CreateItemViewModel : BaseViewModel
 
             if (item != null)
             {
+                // API response doesn't include lat/lng, so set from form values
+                item.Latitude = lat;
+                item.Longitude = lng;
+                try
+                {
+                    await _itemRepository.EnsureOwnersExistAsync(new[] { item.OwnerId });
+                    await _itemRepository.AddAsync(item);
+                }
+                catch { /* local DB unavailable */ }
                 await _navigationService.NavigateBackAsync();
             }
             else

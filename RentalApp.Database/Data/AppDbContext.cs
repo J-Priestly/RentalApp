@@ -15,16 +15,25 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        if (optionsBuilder.IsConfigured) return;
+
         var a = Assembly.GetExecutingAssembly();
-        // var resources = a.GetManifestResourceNames();
         using var stream = a.GetManifestResourceStream("RentalApp.Database.appsettings.json");
 
         var config = new ConfigurationBuilder()
             .AddJsonStream(stream)
             .Build();
 
+        var connectionString = config.GetConnectionString("DevelopmentConnection")!;
+
+        // Android emulator uses 10.0.2.2 to reach the host machine instead of localhost
+        if (OperatingSystem.IsAndroid())
+            connectionString = connectionString.Replace("Host=localhost", "Host=10.0.2.2")
+                + ";SSL Mode=Disable;Trust Server Certificate=true";
+
         optionsBuilder.UseNpgsql(
-            config.GetConnectionString("DevelopmentConnection")
+            connectionString,
+            o => o.UseNetTopologySuite()
         );
     }
 
@@ -81,6 +90,8 @@ public class AppDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(e => e.OwnerId)
                   .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(e => e.Location)
+                  .HasColumnType("geography (point)");
         });
 
         // Rental

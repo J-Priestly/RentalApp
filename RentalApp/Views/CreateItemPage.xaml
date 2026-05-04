@@ -126,27 +126,40 @@
 					<!-- Location -->
 					<Label Text="Location" FontSize="14" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#333333, Dark=#CCCCCC}"/>
-					<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-						<Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
-                                StrokeThickness="1"
-                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
-                                Padding="4,0">
-							<Border.StrokeShape>
-								<RoundRectangle CornerRadius="10"/>
-							</Border.StrokeShape>
-							<Entry Text="{Binding Latitude}" Placeholder="Latitude" Keyboard="Numeric"/>
-						</Border>
-						<Border Grid.Column="1"
-                                BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
-                                StrokeThickness="1"
-                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
-                                Padding="4,0">
-							<Border.StrokeShape>
-								<RoundRectangle CornerRadius="10"/>
-							</Border.StrokeShape>
-							<Entry Text="{Binding Longitude}" Placeholder="Longitude" Keyboard="Numeric"/>
-						</Border>
-					</Grid>
+					<Label Text="Search for a postcode or address, or tap the map to pin your location"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+
+					<!-- Selected address display -->
+					<Border BackgroundColor="{AppThemeBinding Light=#F0F7FF, Dark=#1A2A3A}"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#BBDEFB, Dark=#1E3A5F}"
+                            Padding="12,8">
+						<Border.StrokeShape>
+							<RoundRectangle CornerRadius="8"/>
+						</Border.StrokeShape>
+						<Label Text="{Binding AddressDisplay}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light=#1565C0, Dark=#64B5F6}"
+                               LineBreakMode="TailTruncation"
+                               MaxLines="2"/>
+					</Border>
+
+					<!-- Leaflet map -->
+					<Border StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                            HeightRequest="280">
+						<Border.StrokeShape>
+							<RoundRectangle CornerRadius="10"/>
+						</Border.StrokeShape>
+						<WebView x:Name="LocationMap"
+                                 HeightRequest="280"
+                                 Navigating="OnMapNavigating"/>
+					</Border>
+
+					<!-- Coords stored invisibly — filled by map tap -->
+					<Entry Text="{Binding Latitude}" IsVisible="False"/>
+					<Entry Text="{Binding Longitude}" IsVisible="False"/>
 
 				</VerticalStackLayout>
 			</Border>

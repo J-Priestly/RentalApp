@@ -1,6 +1,7 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using RentalApp.Database.Data.Repositories;
 using RentalApp.Database.Models;
 using RentalApp.Services;
 
@@ -9,19 +10,25 @@ namespace RentalApp.ViewModels;
 public partial class RentalsViewModel : BaseViewModel
 {
     private readonly IApiService _apiService;
+    private readonly IRentalRepository _rentalRepository;
+    private readonly IRentalService _rentalService;
+    private readonly INavigationService _navigationService;
 
     [ObservableProperty]
-    private ObservableCollection<Rental> incomingRentals = new();
+    private ObservableCollection<RentalDisplayItem> incomingRentals = new();
 
     [ObservableProperty]
-    private ObservableCollection<Rental> outgoingRentals = new();
+    private ObservableCollection<RentalDisplayItem> outgoingRentals = new();
 
     [ObservableProperty]
     private bool showingIncoming = true;
 
-    public RentalsViewModel(IApiService apiService)
+    public RentalsViewModel(IApiService apiService, IRentalRepository rentalRepository, IRentalService rentalService, INavigationService navigationService)
     {
         _apiService = apiService;
+        _rentalRepository = rentalRepository;
+        _rentalService = rentalService;
+        _navigationService = navigationService;
         Title = "My Rentals";
     }
 
@@ -30,15 +37,59 @@ public partial class RentalsViewModel : BaseViewModel
     {
         if (IsBusy) return;
         IsBusy = true;
-        ClearError();
+        ResetError();
 
         try
         {
-            var incoming = await _apiService.GetIncomingRentalsAsync();
-            IncomingRentals = new ObservableCollection<Rental>(incoming);
+            Dictionary<int, string> titleLookup;
+            try
+            {
+                var items = await _apiService.GetItemsAsync();
+                titleLookup = items.ToDictionary(i => i.Id, i => i.Title);
+            }
+            catch
+            {
+                titleLookup = new Dictionary<int, string>();
+            }
 
-            var outgoing = await _apiService.GetOutgoingRentalsAsync();
-            OutgoingRentals = new ObservableCollection<Rental>(outgoing);
+            string ResolveTitle(int itemId) =>
+                titleLookup.TryGetValue(itemId, out var t) ? t : $"Item #{itemId}";
+
+            IEnumerable<Rental> incoming;
+            IEnumerable<Rental> outgoing;
+
+            try
+            {
+                incoming = await _rentalRepository.GetByItemOwnerAsync(_apiService.CurrentUserId);
+                outgoing = await _rentalRepository.GetByBorrowerAsync(_apiService.CurrentUserId);
+
+                // local DB is empty — fall back to API
+                if (!incoming.Any() && !outgoing.Any())
+                {
+                    incoming = await _apiService.GetIncomingRentalsAsync();
+                    outgoing = await _apiService.GetOutgoingRentalsAsync();
+                }
+            }
+            catch
+            {
+                // local DB unavailable, fall back to API
+                incoming = await _apiService.GetIncomingRentalsAsync();
+                outgoing = await _apiService.GetOutgoingRentalsAsync();
+            }
+
+            IncomingRentals = new ObservableCollection<RentalDisplayItem>(
+                incoming.Select(r => new RentalDisplayItem
+                {
+                    Rental = r,
+                    ItemTitle = ResolveTitle(r.ItemId)
+                }));
+
+            OutgoingRentals = new ObservableCollection<RentalDisplayItem>(
+                outgoing.Select(r => new RentalDisplayItem
+                {
+                    Rental = r,
+                    ItemTitle = ResolveTitle(r.ItemId)
+                }));
         }
         catch (Exception ex)
         {
@@ -51,48 +102,38 @@ public partial class RentalsViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void ShowIncoming()
-    {
-        ShowingIncoming = true;
-    }
+    private void ShowIncoming() => ShowingIncoming = true;
 
     [RelayCommand]
-    private void ShowOutgoing()
+    private void ShowOutgoing() => ShowingIncoming = false;
+
+    [RelayCommand]
+    private async Task LeaveReviewAsync(Rental rental)
     {
-        ShowingIncoming = false;
+        if (rental == null) return;
+        await _navigationService.NavigateToAsync($"ReviewsPage?itemId={rental.ItemId}&rentalId={rental.Id}");
     }
 
     [RelayCommand]
     private async Task ApproveRentalAsync(Rental rental)
     {
         if (rental == null) return;
-        await UpdateStatusAsync(rental.Id, "Approved");
+        var (success, message) = await _rentalService.ApproveRentalAsync(rental);
+        if (success)
+            await LoadRentalsAsync();
+        else
+            SetError(message);
     }
 
     [RelayCommand]
     private async Task RejectRentalAsync(Rental rental)
     {
         if (rental == null) return;
-        await UpdateStatusAsync(rental.Id, "Rejected");
+        var (success, message) = await _rentalService.RejectRentalAsync(rental);
+        if (success)
+            await LoadRentalsAsync();
+        else
+            SetError(message);
     }
 
-    private async Task UpdateStatusAsync(int rentalId, string status)
-    {
-        try
-        {
-            var result = await _apiService.UpdateRentalStatusAsync(rentalId, status);
-            if (result != null)
-            {
-                await LoadRentalsAsync();
-            }
-            else
-            {
-                SetError($"Failed to update status to {status}");
-            }
-        }
-        catch (Exception ex)
-        {
-            SetError($"Error: {ex.Message}");
-        }
-    }
 }

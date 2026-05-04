@@ -10,16 +10,37 @@
 	<ScrollView>
 		<VerticalStackLayout Spacing="0">
 
-			<!-- Hero Image Area -->
-			<Border BackgroundColor="{AppThemeBinding Light=#E8E8E8, Dark=#3A3A3A}"
-                    StrokeThickness="0"
-                    HeightRequest="280">
-				<Label Text="No Image"
-                       FontSize="20"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center"
-                       Opacity="0.4"/>
-			</Border>
+			<!-- Hero Image Area — gradient with title overlay -->
+			<Grid HeightRequest="260">
+				<Border StrokeThickness="0">
+					<Border.Background>
+						<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+							<GradientStop Color="#1E3A8A" Offset="0.0"/>
+							<GradientStop Color="#1877F2" Offset="1.0"/>
+						</LinearGradientBrush>
+					</Border.Background>
+					<Label Text="📷" FontSize="80"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="White" Opacity="0.12"/>
+				</Border>
+				<!-- Dark gradient overlay at bottom -->
+				<BoxView VerticalOptions="End" HeightRequest="110">
+					<BoxView.Background>
+						<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+							<GradientStop Color="Transparent" Offset="0.0"/>
+							<GradientStop Color="#BB000000" Offset="1.0"/>
+						</LinearGradientBrush>
+					</BoxView.Background>
+				</BoxView>
+				<!-- Title + category text -->
+				<VerticalStackLayout VerticalOptions="End" Padding="20,0,20,16" Spacing="4">
+					<Label Text="{Binding Item.Category, FallbackValue=''}"
+                           FontSize="12" TextColor="White" Opacity="0.75"
+                           FontAttributes="Bold" CharacterSpacing="1"/>
+					<Label Text="{Binding Item.Title, FallbackValue=''}"
+                           FontSize="22" FontAttributes="Bold" TextColor="White"/>
+				</VerticalStackLayout>
+			</Grid>
 
 			<!-- View Mode -->
 			<VerticalStackLayout Spacing="0"
@@ -30,8 +51,11 @@
                         StrokeThickness="0"
                         Padding="20,16"
                         Margin="0,0,0,2">
+					<Border.Shadow>
+						<Shadow Brush="#20000000" Offset="0,2" Radius="6" Opacity="0.15"/>
+					</Border.Shadow>
 					<VerticalStackLayout Spacing="6">
-						<Label Text="{Binding Item.DailyRate, StringFormat='{0:F2}/day'}"
+						<Label Text="{Binding Item.DailyRate, StringFormat='£{0:F2}/day'}"
                                FontSize="28"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light=#222222, Dark=White}"/>
@@ -68,6 +92,9 @@
                         StrokeThickness="0"
                         Padding="20,16"
                         Margin="0,0,0,2">
+					<Border.Shadow>
+						<Shadow Brush="#20000000" Offset="0,2" Radius="6" Opacity="0.15"/>
+					</Border.Shadow>
 					<VerticalStackLayout Spacing="8">
 						<Label Text="Description"
                                FontSize="16"
@@ -79,11 +106,46 @@
 					</VerticalStackLayout>
 				</Border>
 
+				<!-- Location Card -->
+				<Border BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
+                        StrokeThickness="0"
+                        Padding="20,16"
+                        Margin="0,0,0,2">
+					<Border.Shadow>
+						<Shadow Brush="#20000000" Offset="0,2" Radius="6" Opacity="0.15"/>
+					</Border.Shadow>
+					<VerticalStackLayout Spacing="10">
+						<Label Text="Location"
+                               FontSize="16"
+                               FontAttributes="Bold"/>
+						<Border StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                HeightRequest="220">
+							<Border.StrokeShape>
+								<RoundRectangle CornerRadius="10"/>
+							</Border.StrokeShape>
+							<WebView x:Name="ViewMap" HeightRequest="220"/>
+						</Border>
+					</VerticalStackLayout>
+				</Border>
+
 				<!-- Owner Edit Button -->
 				<Button Text="Edit Listing"
                         Command="{Binding StartEditingCommand}"
                         IsVisible="{Binding IsOwner}"
-                        Margin="16,12"
+                        Margin="16,12,16,0"
+                        HeightRequest="44"
+                        FontSize="15"
+                        BackgroundColor="Transparent"
+                        TextColor="#1877F2"
+                        BorderColor="#1877F2"
+                        BorderWidth="1"
+                        CornerRadius="22"/>
+
+				<!-- Reviews Button -->
+				<Button Text="View Reviews"
+                        Command="{Binding GoToReviewsCommand}"
+                        Margin="16,8,16,12"
                         HeightRequest="44"
                         FontSize="15"
                         BackgroundColor="Transparent"
@@ -114,8 +176,61 @@
 					<Label Text="Daily Rate" FontSize="14" FontAttributes="Bold"/>
 					<Entry Text="{Binding EditDailyRate}" Keyboard="Numeric"/>
 
+					<!-- Edit Location -->
+					<Label Text="Location" FontSize="14" FontAttributes="Bold"/>
+					<Label Text="Tap the map or drag the pin to update the location"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light=#999999, Dark=#777777}"/>
+
+					<Border BackgroundColor="{AppThemeBinding Light=#F0F7FF, Dark=#1A2A3A}"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#BBDEFB, Dark=#1E3A5F}"
+                            Padding="12,8">
+						<Border.StrokeShape>
+							<RoundRectangle CornerRadius="8"/>
+						</Border.StrokeShape>
+						<Label Text="{Binding EditAddressDisplay}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light=#1565C0, Dark=#64B5F6}"
+                               LineBreakMode="TailTruncation"
+                               MaxLines="2"/>
+					</Border>
+
+					<Border StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                            HeightRequest="260">
+						<Border.StrokeShape>
+							<RoundRectangle CornerRadius="10"/>
+						</Border.StrokeShape>
+						<WebView x:Name="EditMap"
+                                 HeightRequest="260"
+                                 Navigating="OnEditMapNavigating"/>
+					</Border>
+
+					<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+						<Border BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+							<Border.StrokeShape>
+								<RoundRectangle CornerRadius="10"/>
+							</Border.StrokeShape>
+							<Entry Text="{Binding EditLatitude}" Placeholder="Latitude" IsReadOnly="True"/>
+						</Border>
+						<Border Grid.Column="1"
+                                BackgroundColor="{AppThemeBinding Light=#F8F8F8, Dark=#3A3A3A}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#555555}"
+                                Padding="4,0">
+							<Border.StrokeShape>
+								<RoundRectangle CornerRadius="10"/>
+							</Border.StrokeShape>
+							<Entry Text="{Binding EditLongitude}" Placeholder="Longitude" IsReadOnly="True"/>
+						</Border>
+					</Grid>
+
 					<Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-						<Button Text="Save"
+                        <Button Text="Save"
                                 Command="{Binding SaveEditCommand}"
                                 HeightRequest="44"
                                 BackgroundColor="#4CAF50"
@@ -136,6 +251,9 @@
                     BackgroundColor="{AppThemeBinding Light=White, Dark=#2A2A2A}"
                     StrokeThickness="0"
                     Padding="20">
+				<Border.Shadow>
+					<Shadow Brush="#20000000" Offset="0,2" Radius="6" Opacity="0.15"/>
+				</Border.Shadow>
 				<Border.StrokeShape>
 					<RoundRectangle CornerRadius="12"/>
 				</Border.StrokeShape>
@@ -168,7 +286,7 @@
 							<Label Text="Estimated Total: "
                                    FontSize="16"
                                    VerticalOptions="Center"/>
-							<Label Text="{Binding TotalPrice, StringFormat='{0}'}"
+							<Label Text="{Binding TotalPrice, StringFormat='£{0:F2}'}"
                                    FontSize="22"
                                    FontAttributes="Bold"
                                    VerticalOptions="Center"
