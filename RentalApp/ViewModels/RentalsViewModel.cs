@@ -12,6 +12,7 @@ public partial class RentalsViewModel : BaseViewModel
     private readonly IApiService _apiService;
     private readonly IRentalRepository _rentalRepository;
     private readonly IRentalService _rentalService;
+    private readonly INavigationService _navigationService;
 
     [ObservableProperty]
     private ObservableCollection<RentalDisplayItem> incomingRentals = new();
@@ -22,11 +23,12 @@ public partial class RentalsViewModel : BaseViewModel
     [ObservableProperty]
     private bool showingIncoming = true;
 
-    public RentalsViewModel(IApiService apiService, IRentalRepository rentalRepository, IRentalService rentalService)
+    public RentalsViewModel(IApiService apiService, IRentalRepository rentalRepository, IRentalService rentalService, INavigationService navigationService)
     {
         _apiService = apiService;
         _rentalRepository = rentalRepository;
         _rentalService = rentalService;
+        _navigationService = navigationService;
         Title = "My Rentals";
     }
 
@@ -60,6 +62,13 @@ public partial class RentalsViewModel : BaseViewModel
             {
                 incoming = await _rentalRepository.GetByItemOwnerAsync(_apiService.CurrentUserId);
                 outgoing = await _rentalRepository.GetByBorrowerAsync(_apiService.CurrentUserId);
+
+                // local DB is empty — fall back to API
+                if (!incoming.Any() && !outgoing.Any())
+                {
+                    incoming = await _apiService.GetIncomingRentalsAsync();
+                    outgoing = await _apiService.GetOutgoingRentalsAsync();
+                }
             }
             catch
             {
@@ -99,6 +108,13 @@ public partial class RentalsViewModel : BaseViewModel
     private void ShowOutgoing() => ShowingIncoming = false;
 
     [RelayCommand]
+    private async Task LeaveReviewAsync(Rental rental)
+    {
+        if (rental == null) return;
+        await _navigationService.NavigateToAsync($"ReviewsPage?itemId={rental.ItemId}&rentalId={rental.Id}");
+    }
+
+    [RelayCommand]
     private async Task ApproveRentalAsync(Rental rental)
     {
         if (rental == null) return;
@@ -119,4 +135,5 @@ public partial class RentalsViewModel : BaseViewModel
         else
             SetError(message);
     }
+
 }

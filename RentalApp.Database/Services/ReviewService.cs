@@ -33,10 +33,7 @@ public class ReviewService : IReviewService
             return (false, "Please write a comment", null);
 
         var review = await _apiService.CreateReviewAsync(itemId, rentalId, rating, comment);
-
-        return review != null
-            ? (true, "Review submitted!", review)
-            : (false, "Failed to submit review. You may have already reviewed this rental.", null);
+        return (true, "Review submitted!", review);
     }
 
     public async Task<(IEnumerable<Review> Reviews, double AverageRating)> GetReviewsAsync(int itemId)

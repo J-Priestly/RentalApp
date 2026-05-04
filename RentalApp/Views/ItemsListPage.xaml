@@ -8,6 +8,11 @@
              Title="{Binding Title}"
              BackgroundColor="{AppThemeBinding Light=#F2F2F2, Dark=#1A1A1A}">
 
+	<ContentPage.Resources>
+		<LinearItemsLayout x:Key="VerticalList" Orientation="Vertical" ItemSpacing="0"/>
+		<GridItemsLayout x:Key="TwoColumnGrid" Orientation="Vertical" Span="2" HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
+	</ContentPage.Resources>
+
 	<Grid RowDefinitions="Auto,Auto,*">
 
 		<!-- Search Bar -->
@@ -51,11 +56,6 @@
 
 			<CollectionView ItemsSource="{Binding Items}"
                             ItemsLayout="{OnIdiom Phone={StaticResource VerticalList}, Default={StaticResource TwoColumnGrid}}">
-
-				<CollectionView.Resources>
-					<LinearItemsLayout x:Key="VerticalList" Orientation="Vertical" ItemSpacing="0"/>
-					<GridItemsLayout x:Key="TwoColumnGrid" Orientation="Vertical" Span="2" HorizontalItemSpacing="8" VerticalItemSpacing="8"/>
-				</CollectionView.Resources>
 
 				<CollectionView.ItemTemplate>
 					<DataTemplate x:DataType="models:Item">

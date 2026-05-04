@@ -12,6 +12,7 @@ public partial class NearbyItemsViewModel : BaseViewModel
     private readonly ILocationService _locationService;
     private readonly IItemRepository _itemRepository;
     private readonly INavigationService _navigationService;
+    private readonly IApiService _apiService;
 
     [ObservableProperty]
     private ObservableCollection<NearbyItemDisplay> nearbyItems = new();
@@ -25,12 +26,37 @@ public partial class NearbyItemsViewModel : BaseViewModel
     public NearbyItemsViewModel(
         ILocationService locationService,
         IItemRepository itemRepository,
-        INavigationService navigationService)
+        INavigationService navigationService,
+        IApiService apiService)
     {
         _locationService = locationService;
         _itemRepository = itemRepository;
         _navigationService = navigationService;
+        _apiService = apiService;
         Title = "Nearby Items";
+    }
+
+    // Pulls items from the API and saves them locally so PostGIS can query them
+    private async Task SyncItemsFromApiAsync()
+    {
+        try
+        {
+            var apiItems = (await _apiService.GetItemsAsync()).ToList();
+            if (!apiItems.Any()) return;
+
+            var existing = await _itemRepository.GetAllIdsAsync();
+
+            // Ensure every owner referenced by API items exists locally
+            await _itemRepository.EnsureOwnersExistAsync(apiItems.Select(i => i.OwnerId).Distinct());
+
+            // skip items with no location data (API doesn't return lat/lng)
+            foreach (var item in apiItems.Where(i => !existing.Contains(i.Id)
+                                                   && (i.Latitude != 0 || i.Longitude != 0)))
+            {
+                try { await _itemRepository.AddAsync(item); } catch { /* skip on conflict */ }
+            }
+        }
+        catch { /* API unavailable, continue with local data */ }
     }
 
     [RelayCommand]
@@ -54,6 +80,9 @@ public partial class NearbyItemsViewModel : BaseViewModel
 
             var (lat, lng) = position.Value;
             LocationStatus = $"Searching within {RadiusMiles:F0} miles of your location...";
+
+            // Sync from API so PostGIS has up-to-date items with Location set
+            await SyncItemsFromApiAsync();
 
             var results = await _itemRepository.GetNearbyItemsAsync(lat, lng, RadiusMiles);
 

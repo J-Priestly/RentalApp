@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RentalApp.Services;
-using Windows.Services.Maps;
 
 namespace RentalApp.ViewModels;
 

@@ -244,13 +244,14 @@ public class ApiService : IApiService
     public async Task<ApiStatusResponse?> UpdateRentalStatusAsync(int id, string status)
     {
         ApplyAuth();
-        try
+        var response = await _http.PatchAsJsonAsync($"/rentals/{id}/status", new { status });
+        if (!response.IsSuccessStatusCode)
         {
-            var response = await _http.PatchAsJsonAsync($"/rentals/{id}/status", new { status });
-            if (!response.IsSuccessStatusCode) return null;
-            return await response.Content.ReadFromJsonAsync<ApiStatusResponse>();
+            var error = await response.Content.ReadAsStringAsync();
+            System.Diagnostics.Debug.WriteLine($"UpdateRentalStatus failed: {response.StatusCode} - {error}");
+            throw new Exception(string.IsNullOrWhiteSpace(error) ? $"HTTP {(int)response.StatusCode}" : error);
         }
-        catch { return null; }
+        return await response.Content.ReadFromJsonAsync<ApiStatusResponse>();
     }
 
     public async Task<IEnumerable<Review>> GetReviewsAsync(int itemId)
@@ -271,29 +272,23 @@ public class ApiService : IApiService
     public async Task<Review?> CreateReviewAsync(int itemId, int rentalId, int rating, string comment)
     {
         ApplyAuth();
-        try
+        var response = await _http.PostAsJsonAsync("/reviews", new
         {
-            var response = await _http.PostAsJsonAsync("/reviews", new
-            {
-                itemId,
-                rentalId,
-                rating,
-                comment
-            });
+            itemId,
+            rentalId,
+            rating,
+            comment
+        });
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                System.Diagnostics.Debug.WriteLine($"CreateReview failed: {response.StatusCode} - {error}");
-                return null;
-            }
-            return await response.Content.ReadFromJsonAsync<Review>();
-        }
-        catch (Exception ex)
+        if (!response.IsSuccessStatusCode)
         {
-            System.Diagnostics.Debug.WriteLine($"CreateReview exception: {ex.Message}");
-            return null;
+            var error = await response.Content.ReadAsStringAsync();
+            System.Diagnostics.Debug.WriteLine($"CreateReview failed: {response.StatusCode} - {error}");
+            // throw so the caller sees the real API error rather than a generic message
+            throw new Exception(string.IsNullOrWhiteSpace(error) ? $"HTTP {(int)response.StatusCode}" : error);
         }
+
+        return await response.Content.ReadFromJsonAsync<Review>();
     }
 
 

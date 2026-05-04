@@ -7,4 +7,6 @@ public interface IItemRepository : IRepository<Item>
     Task<IEnumerable<Item>> GetByOwnerAsync(int ownerId);
     Task<IEnumerable<Item>> GetByCategoryAsync(int categoryId);
     Task<IEnumerable<NearbyItemResult>> GetNearbyItemsAsync(double latitude, double longitude, double radiusMiles);
+    Task EnsureOwnersExistAsync(IEnumerable<int> ownerIds);
+    Task<HashSet<int>> GetAllIdsAsync();
 }

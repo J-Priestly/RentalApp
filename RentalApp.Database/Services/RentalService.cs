@@ -80,4 +80,5 @@ public class RentalService : IRentalService
             ? (true, "Rental rejected")
             : (false, "Failed to reject rental");
     }
+
 }

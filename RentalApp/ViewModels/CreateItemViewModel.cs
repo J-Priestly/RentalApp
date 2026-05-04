@@ -94,7 +94,15 @@ public partial class CreateItemViewModel : BaseViewModel
 
             if (item != null)
             {
-                try { await _itemRepository.AddAsync(item); } catch { /* local DB unavailable */ }
+                // API response doesn't include lat/lng, so set from form values
+                item.Latitude = lat;
+                item.Longitude = lng;
+                try
+                {
+                    await _itemRepository.EnsureOwnersExistAsync(new[] { item.OwnerId });
+                    await _itemRepository.AddAsync(item);
+                }
+                catch { /* local DB unavailable */ }
                 await _navigationService.NavigateBackAsync();
             }
             else

@@ -75,6 +75,35 @@ public class ItemRepository : IItemRepository
             .ToListAsync();
     }
 
+    public async Task<HashSet<int>> GetAllIdsAsync()
+    {
+        return (await _context.Items.Select(i => i.Id).ToListAsync()).ToHashSet();
+    }
+
+    public async Task EnsureOwnersExistAsync(IEnumerable<int> ownerIds)
+    {
+        foreach (var id in ownerIds)
+        {
+            var exists = await _context.Users.AnyAsync(u => u.Id == id);
+            if (!exists)
+            {
+                _context.Users.Add(new User
+                {
+                    Id = id,
+                    FirstName = "User",
+                    LastName = id.ToString(),
+                    Email = $"api_user_{id}@placeholder.local",
+                    PasswordHash = "n/a",
+                    PasswordSalt = "n/a",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    IsActive = true
+                });
+                try { await _context.SaveChangesAsync(); } catch { _context.ChangeTracker.Clear(); }
+            }
+        }
+    }
+
     public async Task<IEnumerable<NearbyItemResult>> GetNearbyItemsAsync(
         double latitude, double longitude, double radiusMiles)
     {

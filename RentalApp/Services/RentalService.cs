@@ -66,19 +66,15 @@ public class RentalService : IRentalService
     {
         try
         {
-            
             var state = RentalStateFactory.GetState(rental.Status);
-            state.Approve(); 
+            state.Approve();
+            await _apiService.UpdateRentalStatusAsync(rental.Id, "Approved");
+            return (true, "Rental approved");
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
             return (false, ex.Message);
         }
-
-        var result = await _apiService.UpdateRentalStatusAsync(rental.Id, "Approved");
-        return result != null
-            ? (true, "Rental approved")
-            : (false, "Failed to approve rental");
     }
 
     public async Task<(bool Success, string Message)> RejectRentalAsync(Rental rental)
@@ -87,15 +83,13 @@ public class RentalService : IRentalService
         {
             var state = RentalStateFactory.GetState(rental.Status);
             state.Reject();
+            await _apiService.UpdateRentalStatusAsync(rental.Id, "Rejected");
+            return (true, "Rental rejected");
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
             return (false, ex.Message);
         }
-
-        var result = await _apiService.UpdateRentalStatusAsync(rental.Id, "Rejected");
-        return result != null
-            ? (true, "Rental rejected")
-            : (false, "Failed to reject rental");
     }
+
 }

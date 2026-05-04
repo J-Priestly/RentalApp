@@ -24,8 +24,15 @@ public class AppDbContext : DbContext
             .AddJsonStream(stream)
             .Build();
 
+        var connectionString = config.GetConnectionString("DevelopmentConnection")!;
+
+        // Android emulator uses 10.0.2.2 to reach the host machine instead of localhost
+        if (OperatingSystem.IsAndroid())
+            connectionString = connectionString.Replace("Host=localhost", "Host=10.0.2.2")
+                + ";SSL Mode=Disable;Trust Server Certificate=true";
+
         optionsBuilder.UseNpgsql(
-            config.GetConnectionString("DevelopmentConnection"),
+            connectionString,
             o => o.UseNetTopologySuite()
         );
     }

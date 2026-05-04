@@ -58,29 +58,21 @@ public partial class ItemsListViewModel : BaseViewModel
 
         try
         {
-            var result = await _itemRepository.GetAllAsync();
-            var list = result.ToList();
-
-            // if local DB is empty, pull from API instead
-            if (!list.Any())
-            {
-                var apiItems = await _apiService.GetItemsAsync();
-                list = apiItems.ToList();
-            }
-
-            _allItems = list;
+            // pull from API so all items are visible
+            var apiItems = await _apiService.GetItemsAsync();
+            _allItems = apiItems.ToList();
             ApplyFilter();
         }
-        catch (Exception ex)
+        catch
         {
-            // local DB unavailable, try API as fallback
+            // API unavailable, fall back to local DB
             try
             {
-                var apiItems = await _apiService.GetItemsAsync();
-                _allItems = apiItems.ToList();
+                var result = await _itemRepository.GetAllAsync();
+                _allItems = result.ToList();
                 ApplyFilter();
             }
-            catch
+            catch (Exception ex)
             {
                 SetError($"Failed to load items: {ex.Message}");
             }
