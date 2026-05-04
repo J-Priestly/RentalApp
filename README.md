@@ -1,9 +1,9 @@
-https://img.shields.io/badge/.NET-9.0-512BD4
-https://img.shields.io/badge/.NET%20MAUI-cross--platform-512BD4
-https://img.shields.io/badge/PostgreSQL-16-336791
-https://img.shields.io/badge/tests-96%20passing-brightgreen
-https://img.shields.io/badge/Docker-compose-2496ED
-https://img.shields.io/badge/license-MIT-green
+!https://img.shields.io/badge/.NET-9.0-512BD4
+!https://img.shields.io/badge/.NET%20MAUI-cross--platform-512BD4
+!https://img.shields.io/badge/PostgreSQL-16-336791
+!https://img.shields.io/badge/tests-96%20passing-brightgreen
+!https://img.shields.io/badge/Docker-compose-2496ED
+!https://img.shields.io/badge/license-MIT-green
 # RentalApp – Rental Marketplace
 
 A .NET MAUI mobile application allowing members to list, find, and rent items from each other. 
