@@ -1,91 +1,48 @@
----
-title: "RentalApp readme"
-parent: RentalApp
-grand_parent: C# practice
-nav_order: 5
-mermaid: true
----
+https://img.shields.io/badge/.NET-9.0-512BD4
+https://img.shields.io/badge/.NET%20MAUI-cross--platform-512BD4
+https://img.shields.io/badge/PostgreSQL-16-336791
+https://img.shields.io/badge/tests-96%20passing-brightgreen
+https://img.shields.io/badge/Docker-compose-2496ED
+https://img.shields.io/badge/license-MIT-green
+# RentalApp – Rental Marketplace
 
-# RentalApp
+A .NET MAUI mobile application allowing members to list, find, and rent items from each other. 
 
-The purpose of this app is to act as a starting point for further development. It provides some
-basic features including:
+## Features
 
-* Database integration and migrations
-* Role-based security
-* Local authentication
-* Example navigation
-
-This version of the app uses PostgreSQL for data storage and Entity Framework Core for object-relational mapping
-and migrations.
-
-To fully understand how it works, you should follow an appropriate set of tutorials such as 
-[this one](https://edinburgh-napier.github.io/SET09102/tutorials/csharp/) which covers all of the main
-concepts and techniques used here. However, if you want to jump straight in and work out any problems
-as you go along, that will also work. The code uses structured comments for use with the 
-[Doxygen](https://www.doxygen.nl/) documentation generator tool. 
-
-You can use any development environment with this project including
-
-* [Rider](https://www.jetbrains.com/rider/)
-* [Visual Studio](https://visualstudio.microsoft.com/)
-* [Visual Studio Code](https://code.visualstudio.com/)
-
-The instructions assume you will be using VSCode since that is a lowest-common-denominator choice.
-
-## Compatibility
-
-This app is built using the following tool versions.
-
-| Name                                                                                      | Version     |
-|-------------------------------------------------------------------------------------------|-------------|
-| [.NET](https://dotnet.microsoft.com/en-us/)                                               | 8.0 / 9.0   |
-| [PostgreSQL Docker image](https://hub.docker.com/_/postgres)                              | 16          |
+- User authentication via JWT API
+- Browse and search all available items
+- Create and manage item listings
+- Location based nearby item discovery using PostGIS spatial queries
+- Full rental workflow (request, approve, reject, return, complete)
+- Reviews and ratings
+- State Pattern for rental management
+- Offline fallback to local SQLite database
 
 
-## Getting started
+
+## Setup Instructions
+
+Clone the repo and cd into it
+Start the database: docker compose up -d
+Copy the settings template: cp RentalApp.Database/appsettings.json.template RentalApp.Database/appsettings.json
+Build: dotnet build RentalApp.Database/RentalApp.Database.csproj
+
+## Running Tests
+dotnet test RentalApp.Test/RentalApp.Test.csproj
+
+## API
+The app connects to the SET09102 API: https://set09102-api.b-davison.workers.dev/
 
 ### Prerequisites
 
-Before using this app, ensure you have:
+- Docker Desktop
+- .NET 9 SDK
+- Android Emulator or physical device
+- ADB (Android Debug Bridge)
 
-1. **.NET SDK 8.0** or later installed
-2. **Docker** installed and running
-3. **PostgreSQL container** running (see [dev-environment tutorial](https://edinburgh-napier.github.io/SET09102/tutorials/csharp/dev-environment/))
+### 1. Clone the repository
 
-### Configuration
-
-1. Copy `RentalApp.Database/appsettings.json.template` to `RentalApp.Database/appsettings.json`
-2. Update the connection string with your PostgreSQL credentials:
-   ```json
-   {
-     "ConnectionStrings": {
-       "DevelopmentConnection": "Host=localhost;Username=student_user;Password=password123;Database=RentalApp"
-     }
-   }
-   ```
-
-### Initial Setup
-
-1. Navigate to the Migrations project and create the initial migration:
-   ```bash
-   cd RentalApp.Migrations
-   dotnet ef migrations add InitialCreate
-   ```
-
-2. Apply the migration to create the database:
-   ```bash
-   dotnet ef database update
-   ```
-
-3. Build and run the application:
-   ```bash
-   cd ../RentalApp
-   dotnet build
-   dotnet run
-   ```
-
-### Tutorial
-
-For a comprehensive guide on using this app and understanding its architecture, see the
-[MAUI + MVVM + Database Tutorial](https://edinburgh-napier.github.io/SET09102/tutorials/csharp/maui-mvvm-database/).
+```bash
+git clone https://github.com/J-Priestly/RentalApp.git
+cd RentalApp
